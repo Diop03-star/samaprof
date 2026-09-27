@@ -14,8 +14,8 @@ Le projet est avancé (11 commits, Tasks 1 et 2 codées et revues) mais il vit s
 |---|---|
 | Aucun remote git configuré | Le dépôt GitHub est à créer et à alimenter par un premier push |
 | `gh` absent, `github.com:443` bloqué en TCP depuis la machine du propriétaire | Le push et les réglages d'UI ne peuvent pas être automatisés ; une checklist manuelle est nécessaire |
-| `develop` ne contenait que `docs/` et `.gitignore` | Tasks 1 et 2 n'étaient pas mergées : la branche d'intégration était vide de code |
-| Topologie linéaire `develop` → `feature/scaffold` → `feature/db-schema` | Les deux branches sont intégrables sans conflit, dans cet ordre |
+| La branche d'intégration ne contenait que `docs/` et `.gitignore` | Tasks 1 et 2 n'étaient pas mergées : la branche d'intégration était vide de code |
+| Topologie linéaire de la branche d'intégration → `feature/scaffold` → `feature/db-schema` | Les deux branches sont intégrables sans conflit, dans cet ordre |
 | `.superpowers/` est gitignoré | Le ledger SDD est local ; il ne peut pas servir de surface de coordination |
 | `git config user.name` = `elhadji`, sans lien vérifié avec le compte GitHub | Les commits ne seront pas attribués tant que l'identité n'est pas alignée |
 
@@ -31,13 +31,19 @@ Le plan imposait déjà la convention `feature/<nom>` et une branche d'intégrat
 
 - **fork** — isolation maximale, mais 15 pull requests à faire transiter par le dépôt principal, qui se désynchronise dès qu'un fork traîne ;
 - **clone + branche + PR** — une seule source de vérité, convention déjà écrite, revue centralisée sur un dépôt ;
-- **push direct sur `develop`** — rapide, mais supprime la revue par tâche que le workflow SDD fait déjà et rend les conflits silencieux.
+- **push direct sur la branche d'intégration** — rapide, mais supprime la revue par tâche que le workflow SDD fait déjà et rend les conflits silencieux.
 
 La deuxième option est retenue.
 
-### 3. `develop` est la branche par défaut, `main` n'existe pas encore
+### 3. `main` est la seule branche, et elle porte la protection
 
-Le plan ne mentionne `main` que pour le déploiement (Task 17). Créer `main` maintenant produirait un second point d'entrée où un membre pourrait merger au mauvais endroit. `develop` porte la protection ; `main` sera créée et protégée au moment du déploiement.
+Le dépôt n'avait au départ qu'une branche d'intégration, `develop`, et pas de `main`. Le 2026-09-27, `develop` a été renommée `main`, et `main` est devenue la branche par défaut du dépôt.
+
+Cette décision contredit deux choses écrites plus tôt : la contrainte globale du plan (« on ne travaille jamais sur `main` ») et son Step de déploiement, qui réservait `main` à la ligne de release. Le design retient la contraction de la branche, et amend le plan en conséquence.
+
+Ce qui protège le travail n'est pas le nom de la branche, c'est la règle : pull request obligatoire, `typecheck` et `test` verts, une approbation, branche supprimée au merge. Ces quatre règles sont intactes, donc la contrainte du plan est respectée en substance. Le garde-fou n'est pas dans le nom, il est dans la configuration de la branche protégée.
+
+Ce que la contraction coûte : la ligne de release n'a plus de branche propre. Sur dix-sept tâches et un déploiement unique, ce n'est pas une perte. Si le projetgrossit, une branche `release` s'introduira à ce moment-là, et l'amendement du plan sera plus facile à écrire qu'à faire.
 
 ### 4. Le ledger SDD reste local
 
@@ -53,7 +59,7 @@ Le schéma est appliqué une seule fois, le persona Amadou est identique pour to
 
 ### 7. La Task 4 est un jalon, pas une tâche ordinaire
 
-Le plan affirme que les Tasks 4, 5, 6, 9 ne dépendent de rien. C'est vrai pour Member 2, mais faux pour les deux autres : la Task 8 (services) consomme `lib/ai`, et les Tasks 11–12 consomment la Task 8. Sans priorisation, deux membres sur trois sont inactifs pendant que Member 2 travaille. Member 2 livre donc la Task 4 en premier, et son merge sur `develop` débloque Member 1 puis Member 3. Member 3 travaille la Task 10 pendant ce temps.
+Le plan affirme que les Tasks 4, 5, 6, 9 ne dépendent de rien. C'est vrai pour Member 2, mais faux pour les deux autres : la Task 8 (services) consomme `lib/ai`, et les Tasks 11–12 consomment la Task 8. Sans priorisation, deux membres sur trois sont inactifs pendant que Member 2 travaille. Member 2 livre donc la Task 4 en premier, et son merge débloque Member 1 puis Member 3. Member 3 travaille la Task 10 pendant ce temps.
 
 ## CI
 

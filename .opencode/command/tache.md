@@ -10,11 +10,11 @@ Si `$ARGUMENTS` n'est pas un numéro de task entre 1 et 17, demande confirmation
 ## 1. Synchroniser
 
 ```bash
-git checkout develop
+git checkout main
 git pull
 ```
 
-Si `git pull` échoue (réseau, remote absent), prévient et demande s'il faut continuer en local. Ne bascule pas sur `develop` avec des modifications non commitées en cours : signale-le.
+Si `git pull` échoue (réseau, remote absent), prévient et demande s'il faut continuer en local. Ne bascule pas sur `main` avec des modifications non commitées en cours : signale-le.
 
 ## 2. Identifier le membre
 
@@ -26,7 +26,7 @@ Déduis le membre depuis la table de répartition d'`AGENTS.md` :
 
 ## 3. Vérifier le déblocage
 
-Lis la section « Travail en équipe » d'`AGENTS.md`. Si la tâche dépend d'une tâche qui n'est pas encore mergée dans `develop` (`git branch -r --merged origin/develop`, ou `git log develop --oneline` en local), signale le blocage et propose d'attendre. N'écris pas le code d'une tâche bloquée.
+Lis la section « Travail en équipe » d'`AGENTS.md`. Si la tâche dépend d'une tâche qui n'est pas encore mergée dans `main` (`git branch -r --merged origin/main`, ou `git log main --oneline` en local), signale le blocage et propose d'attendre. N'écris pas le code d'une tâche bloquée.
 
 ## 4. Créer la branche
 

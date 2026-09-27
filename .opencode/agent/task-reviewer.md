@@ -13,7 +13,7 @@ Tu es un relecteur strict du dépôt SamaCoach AI. Tu ne modifies aucun fichier 
 
 1. La branche courante : `git rev-parse --abbrev-ref HEAD`.
 2. Le numéro de tâche : la branche suit `feature/<membre>-task-<N>-<slug>`. S'il est absent, demande-le.
-3. La base de comparaison : `git merge-base HEAD origin/develop` (repli sur `develop` si le remote est indisponible).
+3. La base de comparaison : `git merge-base HEAD origin/main` (repli sur `main` si le remote est indisponible).
 4. La section de la tâche : dans `docs/superpowers/plans/2026-09-25-samacoach-ai-mvp.md`, le bloc `### Task <N> :` jusqu'au `### Task` suivant.
 5. Le diff : `git diff <base>...HEAD` et `git log --oneline <base>..HEAD`.
 

@@ -50,7 +50,7 @@ Ouvre opencode dans le dossier du projet et demande :
 /tache 4
 ```
 
-La commande synchronise `develop`, vérifie que la tâche n'est pas bloquée, crée la branche `feature/m2-task-4-ai-contract` et affiche les étapes. Elle n'implémente rien : elle prépare.
+La commande synchronise `main`, vérifie que la tâche n'est pas bloquée, crée la branche `feature/m2-task-4-ai-contract` et affiche les étapes. Elle n'implémente rien : elle prépare.
 
 Qui fait quoi :
 
@@ -60,7 +60,7 @@ Qui fait quoi :
 | Member 2 — IA / NVIDIA | 4, 5, 6, 9 |
 | Member 3 — Frontend / UX / QA | 10 à 17 |
 
-Tasks 1 et 2 sont déjà mergées dans `develop`.
+Tasks 1 et 2 sont déjà mergées dans `main`.
 
 **Si tu es Member 3** : commence par la Task 10. Les Tasks 11 et 12 dépendent de la Task 8, qui dépend du contrat IA (Task 4). Ne les commence pas avant.
 
@@ -82,11 +82,11 @@ Puis :
 git push -u origin feature/<ta>-task-<N>-<slug>
 ```
 
-Ouvre la pull request sur GitHub en ciblant `develop`. Le propriétaire du dépôt approuve. La branche est supprimée au merge.
+Ouvre la pull request sur GitHub en ciblant `main`. Le propriétaire du dépôt approuve. La branche est supprimée au merge.
 
 ## 8. Ce qu'il ne faut pas faire
 
-- Pousser directement sur `develop`. La branche est protégée, la tentative échouera.
+- Pousser directement sur `main`. La branche est protégée, la tentative échouera.
 - Toucher aux fichiers d'une tâche qui n'est pas la tienne. Ça crée des conflits avec la branche du membre qui travaille dessus.
 - Commiter `.env.local`, une clé API, ou un `NEXT_PUBLIC_*` contenant un secret.
 - Merger sans que `typecheck` et `test` soient verts en CI.
@@ -94,11 +94,11 @@ Ouvre la pull request sur GitHub en ciblant `develop`. Le propriétaire du dép�
 
 ## En cas de blocage
 
-Un `git pull` qui échoue vient presque toujours d'une divergence avec `develop`. Avant de forcer quoi que ce soit :
+Un `git pull` qui échoue vient presque toujours d'une divergence avec `main`. Avant de forcer quoi que ce soit :
 
 ```bash
 git fetch origin
-git log --oneline HEAD..origin/develop
+git log --oneline HEAD..origin/main
 ```
 
-Si `develop` a avancé, rebase ta branche dessus, relance `npm run typecheck` et `npm test`, puis pousse avec `--force-with-lease`. Si tu es bloqué sur un conflit de merge dans un fichier que tu n'as pas touché, ne tranche pas seul : demande.
+Si `main` a avancé, rebase ta branche dessus, relance `npm run typecheck` et `npm test`, puis pousse avec `--force-with-lease`. Si tu es bloqué sur un conflit de merge dans un fichier que tu n'as pas touché, ne tranche pas seul : demande.

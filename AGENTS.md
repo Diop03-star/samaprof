@@ -29,21 +29,22 @@ Répartition des tâches :
 | Member 2 | IA / NVIDIA | 4, 5, 6, 9 |
 | Member 3 | Frontend / UX / QA | 10, 11, 12, 13, 14, 15, 16, 17 |
 
-Tasks 1 et 2 sont mergées dans `develop`. Le reste est à faire.
+Tasks 1 et 2 sont mergées dans `main`. Le reste est à faire.
 
-**Séquence de déblocage** : la Task 4 (contrat `AIProvider` + validation des sorties) est le **jalon**. Tant qu'elle n'est pas mergée dans `develop`, la Task 8 (services) est bloquée pour Member 1, et les Tasks 11–12 le sont pour Member 3. Member 3 travaille la Task 10 en attendant. Ne pas commencer une tâche dont la dépendance n'est pas mergée dans `develop` : le code s'écrit mais la revue devient illisible.
+**Séquence de déblocage** : la Task 4 (contrat `AIProvider` + validation des sorties) est le **jalon**. Tant qu'elle n'est pas mergée dans `main`, la Task 8 (services) est bloquée pour Member 1, et les Tasks 11–12 le sont pour Member 3. Member 3 travaille la Task 10 en attendant. Ne pas commencer une tâche dont la dépendance n'est pas mergée dans `main` : le code s'écrit mais la revue devient illisible.
 
-**Ordre de merge** : une tâche ne peut être mergée que si toutes celles dont elle dépend sont déjà dans `develop`.
+**Ordre de merge** : une tâche ne peut être mergée que si toutes celles dont elle dépend sont déjà dans `main`.
 
 ## Workflow git
 
-- On ne pousse **jamais** directement sur `develop`. Toute passe par une pull request.
-- Branche : `feature/<membre>-task-<N>-<slug>`, ex. `feature/m2-task-4-ai-contract`. Une branche par tâche.
-- Avant de commencer une tâche : `git checkout develop && git pull && git checkout -b feature/<membre>-task-<N>-<slug>`.
+- `main` est la branche d'intégration et la branche par défaut du dépôt. Elle porte la protection.
+- On ne pousse **jamais** directement sur `main`. Toute passe par une pull request.
+- Branche de travail : `feature/<membre>-task-<N>-<slug>`, ex. `feature/m2-task-4-ai-contract`. Une branche par tâche.
+- Avant de commencer une tâche : `git checkout main && git pull && git checkout -b feature/<membre>-task-<N>-<slug>`.
 - Préfixes de commit : `feat:`, `fix:`, `ui:`, `ai:`, `db:`, `test:`, `refactor:`, `docs:`, `chore:`. Un commit = une unité logique cohérente. `chore:` est réservé à l'outillage sans effet sur le produit (CI, configuration, outillage).
-- La pull request cible `develop`. Elle part au vert (`typecheck` + `test`) et attend **une approbation** du propriétaire du dépôt avant merge.
-- La branche est supprimée au merge (règle GitHub activée sur `develop`).
-- `main` n'existe pas encore. Elle sera créée au déploiement (Task 17). Ne pas merger vers `main` avant.
+- La pull request cible `main`. Elle part au vert (`typecheck` + `test`) et attend **une approbation** du propriétaire du dépôt avant merge.
+- La branche est supprimée au merge (règle GitHub activée sur `main`).
+- Une branche d'intégration ne remplace pas la discipline de merge : ce qui compte est qu'aucune PR ne soit mergée sans ses dépendances et sans ses deux checks verts.
 
 ## Vérification avant push
 

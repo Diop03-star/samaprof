@@ -14,6 +14,7 @@
 |---|---|---|
 | Aucune dépendance hors `@supabase/ssr` | Ajout de `vitest` et `tsx` (devDependencies) | Tester et exécuter du TypeScript sans runner impose `--experimental-strip-types` avec imports à extension explicite, en conflit avec les imports Next.js |
 | `supabase/seed.sql` | `scripts/seed.ts` | Créer l'utilisateur démo dans `auth.users` en SQL suppose un accès au schéma interne ; `supabase.auth.admin.createUser` est plus fiable et s'exécute via `npm run seed` |
+| Deux branches : `develop` en intégration, `main` réservée au déploiement | Une seule branche, `main`, en intégration et par défaut | Le propriétaire du dépôt a renommé `develop` en `main` le 2026-09-27. La contrainte « on ne travaille jamais sur `main` » reste respectée en substance : elle est portée par la protection de branche (pull request obligatoire, `typecheck` et `test` verts, une approbation), pas par le nom de la branche. Voir `docs/superpowers/specs/2026-09-27-workflow-equipe-git-design.md` |
 
 ## Global Constraints
 
@@ -26,7 +27,7 @@
 - `masteryScore` = moyenne des `score` des **5** derniers `attempts`, du plus récent au plus ancien. 0 attempt → `next_topic`.
 - 6 tables exactement : `profiles`, `learning_paths`, `lessons`, `exercises`, `attempts`, `progress`. Aucune autre.
 - RLS sur les 6 tables, chaque policy fondée sur `auth.uid()`. `lessons` et `exercises` ont une policy par opération (`select`, `insert`, `update`) car les services écrivent avec le client de l'utilisateur.
-- On ne travaille jamais sur `main`. Branche courante : `feature/<nom>`.
+- On ne travaille jamais directement sur `main`. Toute modification passe par une branche `feature/*` et une pull request, mergeée seulement au vert. Voir l'amendement sur la branche d'intégration dans le tableau ci-dessus.
 - Préfixes de commit : `feat:`, `fix:`, `ui:`, `ai:`, `db:`, `test:`, `refactor:`, `docs:`.
 - **Critère de non-régression principal** : le parcours fonctionne intégralement avec `AI_PROVIDER` absent.
 
@@ -5241,12 +5242,12 @@ du conseil affiché. Voir `tests/adaptation-rules.test.ts`.
 8. `Start recommended activity` → exercice plus facile sur la même faiblesse
 ````
 
-- [ ] **Step 7: Fusionner les 15 branches dans `develop`**
+- [ ] **Step 7: Fusionner les 15 branches dans `main`**
 
 Les tâches créent chacune une branche `feature/*` et n'y committent que leurs propres fichiers. On les fusionne donc dans un ordre qui respecte les dépendances — une étape ne peut pas être fusionnée si une tâche dont elle dépend ne l'est pas encore.
 
 ```bash
-git checkout develop
+git checkout main
 
 # Couche fondatrice : projet, données, auth, contrat IA
 git merge --no-ff feature/scaffold
@@ -5283,10 +5284,10 @@ npm run test
 Expected: arbre de travail propre, `tsc` sans erreur, suite complète au vert. Puis :
 
 ```bash
-git push -u origin develop
+git push -u origin main
 ```
 
-Expected: `develop` contient l'ensemble des tâches. Ne jamais merger vers `main` avant la fin du hackathon.
+Expected: `main` contient l'ensemble des tâches. Voir l'amendement « une seule branche d'intégration » dans le tableau des amendements.
 
 ---
 

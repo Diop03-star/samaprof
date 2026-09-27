@@ -3,7 +3,7 @@ description: Vérifie que la branche est prête pour une pull request et rédige
 agent: build
 ---
 
-Prépare la pull request de la branche courante vers `develop`. Ne pousse rien, ne fusionne rien : tu vérifies et tu rédiges.
+Prépare la pull request de la branche courante vers `main`. Ne pousse rien, ne fusionne rien : tu vérifies et tu rédiges.
 
 ## 1. Le nom de la branche
 
@@ -16,10 +16,10 @@ Elle doit suivre `feature/<membre>-task-<N>-<slug>`. Si elle ne suit pas ce moti
 ## 2. La base de comparaison
 
 ```bash
-git merge-base HEAD origin/develop
+git merge-base HEAD origin/main
 ```
 
-Si le remote est injoignable, compare sur `develop` en local et signale que la vérification porte sur un `develop` éventuellement en retard.
+Si le remote est injoignable, compare sur `main` en local et signale que la vérification porte sur un `main` éventuellement en retard.
 
 ## 3. Les vérifications obligatoires
 
