@@ -32,7 +32,7 @@ export default function LandingPage() {
 
         {/* Paragraphe descriptif */}
         <p className="mx-auto mt-8 max-w-2xl text-lg md:text-xl text-on-surface/70 leading-relaxed">
-          SamaProf détecte vos faiblesses et génère des exercices sur mesure pour consolider vos acquis. L'apprentissage adaptatif repensé pour l'excellence.
+          SamaProf détecte vos faiblesses et génère des exercices sur mesure pour consolider vos acquis. L’apprentissage adaptatif repensé pour l’excellence.
         </p>
 
         {/* Call to Actions */}
