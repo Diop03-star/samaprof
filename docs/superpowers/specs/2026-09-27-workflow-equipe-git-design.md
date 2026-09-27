@@ -21,9 +21,11 @@ Le projet est avancé (11 commits, Tasks 1 et 2 codées et revues) mais il vit s
 
 ## Décisions
 
-### 1. Un dépôt privé sur le compte personnel du propriétaire
+### 1. Un dépôt public sur le compte personnel du propriétaire
 
 Choisi plutôt qu'une organisation pour ne pas bloquer sur un compte à créer. Conséquence assumée : le dépôt reste rattaché à une personne, le transfert de propriété n'est pas un sujet neutre. Les deux autres membres sont invités comme collaborateurs en écriture.
+
+La visibilité est **publique** : projet scolaire, aucun secret exposé (`.env*` est gitignoré et `.env.example` ne contient que des noms de variables vides), et le palier gratuit de GitHub offre les minutes Actions et la protection de branche, que le palier gratuit ne accorde pas aux dépôts privés. Si le besoin d'inverser apparaît, basculer la visibilité se fait en un clic et ne demande aucun changement de code.
 
 ### 2. Clone + branche `feature/*` + pull request, pas de fork
 
@@ -44,6 +46,20 @@ Cette décision contredit deux choses écrites plus tôt : la contrainte globale
 Ce qui protège le travail n'est pas le nom de la branche, c'est la règle : pull request obligatoire, `typecheck` et `test` verts, une approbation, branche supprimée au merge. Ces quatre règles sont intactes, donc la contrainte du plan est respectée en substance. Le garde-fou n'est pas dans le nom, il est dans la configuration de la branche protégée.
 
 Ce que la contraction coûte : la ligne de release n'a plus de branche propre. Sur dix-sept tâches et un déploiement unique, ce n'est pas une perte. Si le projetgrossit, une branche `release` s'introduira à ce moment-là, et l'amendement du plan sera plus facile à écrire qu'à faire.
+
+#### La protection a été activée le 2026-09-27
+
+Tant que la branche n'était pas protégée, les quatre règles ci-dessus n'existaient que comme texte : les PR #1, #2 et #3 sont parties vertes mais ont été mergées sans une seule approbation, `reviews` étant vide sur les trois. La configuration porte désormais les règles :
+
+- 1 approbation requise, avec dismissal des revues obsolètes ;
+- checks `typecheck` et `test` obligatoires, en mode strict (la branche doit être à jour avec `main`) ;
+- `enforce_admins` actif, donc la règle n'est pas contournable par un administrateur ;
+- force-push et suppression de `main` interdits ;
+- `delete_branch_on_merge` actif, ce qui outille la suppression au merge.
+
+`required_linear_history` a été activé puis retiré : il rejetait le bouton « Create a merge commit », méthode pourtant utilisée pour les PR #1 à #3 et cohérente avec l'historique existant. Un paramètre de sécurité qui bloque une méthode de travail réelle est une entrave, pas un garde-fou.
+
+Une conséquence à assumer : **le propriétaire du dépôt ne peut plus approuver ses propres PR.** Comme il écrit une partie des tâches, chacune attend une revue d'un des deux autres membres. C'est le fonctionnement voulu, mais c'est une capacité de merge qui a disparu pour lui et qu'il faut prendre en compte dans l'organisation.
 
 ### 4. Le ledger SDD reste local
 
