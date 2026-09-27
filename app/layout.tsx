@@ -17,6 +17,8 @@ export const metadata: Metadata = {
   description: "Votre parcours. Votre rythme. Votre coach IA.",
 };
 
+import { Header } from "@/components/ui/header";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="fr" className={`${bricolage.variable} ${dmSans.variable}`}>
       <body className="antialiased font-body bg-surface text-on-surface">
+        <Header />
         {children}
       </body>
     </html>

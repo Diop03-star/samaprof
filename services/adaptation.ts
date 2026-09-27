@@ -1,5 +1,5 @@
 // STUB pour services/adaptation.ts (Task 8 manquante)
-export async function getAdaptationFor(userId: string, topic: string, difficulty: string) {
+export async function getAdaptationFor(userId: string, topic: string, difficulty: string | number) {
   return {
     nextActivity: "Micro-défi : Table de multiplication",
     difficulty: "Intermédiaire",

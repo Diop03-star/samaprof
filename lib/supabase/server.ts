@@ -10,11 +10,11 @@ export async function createClient() {
     from: (table: string) => ({
       select: (fields: string) => ({
         eq: (col: string, val: string) => ({
-          maybeSingle: async () => {
-            if (table === "profiles") return { data: { name: "Amadou" } };
-            if (table === "progress")
-              return { data: { completed_lessons: 2, total_lessons: 30, mastery_score: 84 } };
-            return { data: null };
+          maybeSingle: async (): Promise<{ data: any; error: any }> => {
+            if (table === "profiles") return { data: { name: "Amadou", avatar_url: null }, error: null };
+            if (table === "progress") return { data: { completed_lessons: 2, total_lessons: 30, mastery_score: 84 }, error: null };
+            if (table === "learning_paths") return { data: { skill: "Python", goal: "Devenir Data Scientist" }, error: null };
+            return { data: null, error: null };
           },
         }),
       }),
