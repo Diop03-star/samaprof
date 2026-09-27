@@ -1,0 +1,16 @@
+export type {
+  AIProvider,
+  Adaptation,
+  AdaptationAction,
+  AdaptationInput,
+  AdaptiveDecision,
+  Evaluation,
+  EvaluationInput,
+  Exercise,
+  ExerciseInput,
+  LearningPlan,
+  Lesson,
+  LessonInput,
+  Level,
+  PlanInput,
+} from "@/types";
