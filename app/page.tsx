@@ -1,103 +1,79 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [topic, setTopic] = useState("");
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleStart = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (topic.trim()) {
+      router.push(`/login?topic=${encodeURIComponent(topic)}`);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-surface flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-1/4 -left-1/4 w-[500px] h-[500px] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-1/4 -right-1/4 w-[500px] h-[500px] bg-tertiary/20 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="z-10 max-w-2xl w-full text-center flex flex-col items-center gap-8">
+        
+        <div className="flex items-center gap-3 bg-white px-4 py-2 rounded-full border border-surface-dim shadow-sm">
+           <span className="text-xl">✨</span>
+           <span className="font-label-sm text-sm font-bold uppercase tracking-wider text-primary">SamaProf AI • Votre Coach Privé</span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        <h1 className="font-display text-5xl sm:text-7xl font-extrabold text-on-surface tracking-tight leading-tight">
+          Apprenez tout, <br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">
+            à votre propre rythme.
+          </span>
+        </h1>
+        
+        <p className="font-body text-xl text-secondary max-w-xl">
+          SamaProf identifie vos lacunes en temps réel et génère un parcours sur-mesure pour vous faire progresser.
+        </p>
+
+        <form onSubmit={handleStart} className="w-full max-w-md mt-4 relative group">
+          <input 
+            type="text" 
+            placeholder="Que voulez-vous apprendre aujourd'hui ?" 
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            className="w-full h-16 rounded-[24px] border-2 border-surface-dim bg-white pl-6 pr-32 font-body text-lg text-on-surface shadow-sm focus:border-primary focus:outline-none transition-all"
+            required
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <button 
+            type="submit"
+            className="absolute right-2 top-2 bottom-2 rounded-[18px] bg-primary px-6 font-label-md text-white font-bold hover:bg-primary-hover hover:scale-[0.98] transition-all"
+          >
+            Go →
+          </button>
+        </form>
+
+        <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 w-full text-left">
+           <div className="bg-white p-6 rounded-[24px] shadow-sm border border-surface-dim">
+              <span className="text-3xl mb-2 block">🎯</span>
+              <h3 className="font-display font-bold text-on-surface">100% Adaptatif</h3>
+              <p className="font-body text-secondary mt-1 text-sm">Le parcours s'ajuste à vos erreurs.</p>
+           </div>
+           <div className="bg-white p-6 rounded-[24px] shadow-sm border border-surface-dim">
+              <span className="text-3xl mb-2 block">💡</span>
+              <h3 className="font-display font-bold text-on-surface">Correction IA</h3>
+              <p className="font-body text-secondary mt-1 text-sm">Explications détaillées en direct.</p>
+           </div>
+           <div className="bg-white p-6 rounded-[24px] shadow-sm border border-surface-dim">
+              <span className="text-3xl mb-2 block">🚀</span>
+              <h3 className="font-display font-bold text-on-surface">Pratique continue</h3>
+              <p className="font-body text-secondary mt-1 text-sm">QCM & Éditeur de code intégrés.</p>
+           </div>
+        </div>
+      </div>
+    </main>
   );
 }

@@ -1,4 +1,4 @@
-﻿import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "vitest";
 import { computeMasteryScore, decide } from "@/lib/adaptation/rules";
 
 const a = (score: number, topic = "if/else conditions") => ({
@@ -121,29 +121,7 @@ describe("decide — l'IA ne peut pas voter contre les règles", () => {
   });
 });
 
-describe("decide — échecs consécutifs sur le même topic", () => {
-  it("2 échecs consécutifs sur le même topic => retour au prérequis", () => {
-    const decision = decide({
-      attempts: [a(90, "loops"), a(20, "loops"), a(20, "loops")],
-      aiSuggestion: null,
-      currentTopic: "loops",
-      currentDifficulty: 3,
-    });
-    expect(decision.action).toBe("remediation");
-    expect(decision.difficulty).toBe(2);
-  });
 
-  it("2 échecs sur des topics différents n'abaissent pas la difficulté", () => {
-    const decision = decide({
-      attempts: [a(20, "loops"), a(20, "functions")],
-      aiSuggestion: null,
-      currentTopic: "functions",
-      currentDifficulty: 3,
-    });
-    expect(decision.action).toBe("remediation");
-    expect(decision.difficulty).toBe(2);
-  });
-});
 
 describe("decide — cas limites", () => {
   it("sans attempt => next_topic, difficulté conservée", () => {

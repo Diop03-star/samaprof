@@ -1,113 +1,37 @@
-﻿import type { Adaptation, AdaptationAction, AdaptiveDecision } from "@/types";
-
-export type AttemptRecord = {
-  score: number;
-  isCorrect: boolean;
-  topic: string;
-};
-
-export type DecideInput = {
-  attempts: AttemptRecord[];
-  aiSuggestion: Adaptation | null;
-  currentTopic: string;
-  currentDifficulty: number;
-};
-
-const WINDOW = 5;
-const REMEDIATION_BELOW = 40;
-const ADVANCE_AT = 75;
-const MAX_DIFFICULTY = 5;
-
-export function computeMasteryScore(attempts: AttemptRecord[]): number {
-  const recent = attempts.slice(0, WINDOW);
-  if (recent.length === 0) return 0;
-
-  const total = recent.reduce((sum, item) => sum + item.score, 0);
-  return Math.round(total / recent.length);
-}
-
-// `attempts` est ordonné du plus récent au plus ancien. On cherche deux échecs
-// consécutifs sur le même topic à l'intérieur de la fenêtre, pas seulement la
-// paire la plus récente : au-delà de 2 tentatives, l'implémentation précédente
-// s'arrêtait sur la première occurrence correcte et n'examinait plus la paire.
-function hasConsecutiveFailures(attempts: AttemptRecord[], topic: string): boolean {
-  let previousFailed = false;
-
-  for (const item of attempts) {
-    if (item.topic !== topic) continue;
-    if (item.isCorrect) {
-      previousFailed = false;
-      continue;
-    }
-    if (previousFailed) return true;
-    previousFailed = true;
-  }
-
-  return false;
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
-
-function thresholdAction(score: number): AdaptationAction {
-  if (score < REMEDIATION_BELOW) return "remediation";
-  if (score < ADVANCE_AT) return "same_level";
-  return "increase_difficulty";
-}
-
-function defaultNextActivity(action: AdaptationAction, topic: string): string {
-  switch (action) {
-    case "remediation":
-      return `Practice: Basic ${topic}`;
-    case "increase_difficulty":
-      return `Practice: Advanced ${topic}`;
-    case "next_topic":
-      return "Continue to the next topic";
-    case "same_level":
-      return `Practice: ${topic}`;
-  }
-}
-
-export function decide(input: DecideInput): AdaptiveDecision {
-  const { attempts, aiSuggestion, currentTopic, currentDifficulty } = input;
-  const masteryScore = computeMasteryScore(attempts);
-
-  let action: AdaptationAction;
-  if (attempts.length === 0) {
-    action = "next_topic";
-  } else {
-    action = thresholdAction(masteryScore);
-    if (action !== "remediation" && hasConsecutiveFailures(attempts, currentTopic)) {
-      action = "remediation";
-    }
-  }
-
-  const difficulty = clamp(
-    action === "remediation"
-      ? currentDifficulty - 1
-      : action === "increase_difficulty"
-        ? currentDifficulty + 1
-        : currentDifficulty,
-    1,
-    MAX_DIFFICULTY
+export function computeMasteryScore(attempts: { score: number }[]) {
+  if (attempts.length === 0) return 0;
+  const recent = attempts.slice(0, 5);
+  return Math.round(
+    recent.reduce((acc, curr) => acc + curr.score, 0) / recent.length
   );
+}
 
-  // La suggestion de l'IA ne fournit le topic que lorsque les règles décident
-  // de passer à la suite. Sur `remediation`, `same_level` et
-  // `increase_difficulty`, le topic reste celui du learner : laisser l'IA le
-  // remplacer reviendrait à contourner les seuils, ce qu'interdit la règle
-  // centrale. Elle fournit `reason` et `nextActivity` dans tous les cas.
-  const topic =
-    action === "next_topic" ? (aiSuggestion?.topic ?? currentTopic) : currentTopic;
+export function decide(params: { attempts: any[]; currentDifficulty: number; currentTopic: string; aiSuggestion?: any }) {
+  const score = computeMasteryScore(params.attempts);
+  let action = "same_level";
+  let difficulty = params.currentDifficulty;
+  let topic = params.currentTopic;
+
+  if (params.attempts.length === 0) {
+    action = "next_topic";
+    if (params.aiSuggestion) {
+      topic = params.aiSuggestion.topic;
+    }
+  } else if (score < 40) {
+    action = "remediation";
+    difficulty = Math.max(1, difficulty - 1);
+  } else if (score >= 75) {
+    action = "increase_difficulty";
+    difficulty = Math.min(5, difficulty + 1);
+  }
 
   return {
     action,
     topic,
     difficulty,
-    reason: aiSuggestion?.reason ?? "Based on your recent performance",
-    nextActivity: aiSuggestion?.nextActivity ?? defaultNextActivity(action, topic),
+    reason: params.aiSuggestion?.reason || "Rules engine decision",
+    nextActivity: params.aiSuggestion?.nextActivity || "Continue practice",
     source: "rules",
-    masteryScore,
+    masteryScore: score,
   };
 }

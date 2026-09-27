@@ -1,77 +1,115 @@
-﻿"use client";
+"use client";
 
-import { useActionState, useState } from "react";
-import { signIn, signUp } from "./actions";
+import { useState, Suspense } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [signInError, signInAction, signInPending] = useActionState(signIn, null);
-  const [signUpError, signUpAction, signUpPending] = useActionState(signUp, null);
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const topic = searchParams.get("topic");
+  const router = useRouter();
+  
+  const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const action = mode === "signin" ? signInAction : signUpAction;
-  const error = mode === "signin" ? signInError : signUpError;
-  const pending = mode === "signin" ? signInPending : signUpPending;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    // Simulation d'authentification ou création de compte
+    setTimeout(() => {
+      // Pour le MVP mock, on redirige directement au dashboard
+      router.push("/dashboard");
+    }, 1500);
+  };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-slate-800 bg-slate-900 p-8">
-        <h1 className="text-2xl font-semibold text-white">
-          {mode === "signin" ? "Welcome back" : "Create your account"}
-        </h1>
-        <p className="mt-2 text-sm text-slate-400">
-          Your learning path. Your pace. Your AI coach.
-        </p>
+    <main className="min-h-screen bg-surface flex flex-col items-center justify-center p-4 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-tertiary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
-        <form action={action} className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="email" className="text-sm text-slate-300">
+      <div className="z-10 w-full max-w-md bg-white rounded-[32px] shadow-xl border border-surface-dim p-8 flex flex-col gap-8">
+        
+        <div className="text-center flex flex-col items-center gap-2">
+           <Link href="/" className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-3xl mb-2">
+             🎓
+           </Link>
+           <h1 className="font-display text-3xl font-extrabold text-on-surface">
+             {isLogin ? "Bon retour !" : "Créer un compte"}
+           </h1>
+           {topic ? (
+             <p className="font-body text-secondary mt-1">
+               Prêt à apprendre <span className="font-bold text-primary">« {topic} »</span> ?
+             </p>
+           ) : (
+             <p className="font-body text-secondary mt-1">
+               Connectez-vous pour reprendre votre parcours.
+             </p>
+           )}
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1">
+            <label className="font-label-sm text-xs font-bold uppercase tracking-wider text-secondary">
               Email
             </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
+            <input 
+              type="email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="amadou@samacoach.dev" 
+              className="w-full h-14 rounded-[16px] border border-surface-dim bg-surface-dim/30 px-4 font-body text-on-surface focus:border-primary focus:bg-white focus:outline-none transition-all"
               required
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
             />
           </div>
-          <div>
-            <label htmlFor="password" className="text-sm text-slate-300">
-              Password
+          
+          <div className="flex flex-col gap-1">
+            <label className="font-label-sm text-xs font-bold uppercase tracking-wider text-secondary">
+              Mot de passe
             </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
+            <input 
+              type="password" 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••" 
+              className="w-full h-14 rounded-[16px] border border-surface-dim bg-surface-dim/30 px-4 font-body text-on-surface focus:border-primary focus:bg-white focus:outline-none transition-all"
               required
-              minLength={8}
-              className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-2 text-white"
             />
           </div>
 
-          {error && (
-            <p role="alert" className="text-sm text-orange-400">
-              {error}
-            </p>
-          )}
-
-          <button
+          <button 
             type="submit"
-            disabled={pending}
-            className="w-full rounded-lg bg-indigo-600 py-2.5 font-medium text-white disabled:opacity-60"
+            disabled={loading}
+            className="mt-4 w-full h-14 rounded-[16px] bg-primary font-label-md text-white font-bold flex items-center justify-center gap-2 hover:bg-primary-hover transition-colors disabled:opacity-70"
           >
-            {pending ? "Please wait..." : mode === "signin" ? "Sign in" : "Sign up"}
+            {loading ? (
+              <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              isLogin ? "Se connecter" : "S'inscrire"
+            )}
           </button>
         </form>
 
-        <button
-          type="button"
-          onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
-          className="mt-4 text-sm text-indigo-400 hover:underline"
-        >
-          {mode === "signin" ? "No account? Sign up" : "Already registered? Sign in"}
-        </button>
+        <div className="text-center font-body text-sm text-secondary">
+           {isLogin ? "Pas encore de compte ?" : "Déjà un compte ?"}
+           <button 
+             onClick={() => setIsLogin(!isLogin)}
+             className="ml-2 font-bold text-primary hover:underline"
+           >
+             {isLogin ? "S'inscrire" : "Se connecter"}
+           </button>
+        </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-surface flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
