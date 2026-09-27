@@ -46,6 +46,7 @@ function isProvider(value: unknown): value is AIProvider {
 // paresseux, et le mode démo n'exige aucune clé.
 function loadRemoteProvider(name: "nvidia" | "gemini"): AIProvider | null {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require(`./${name}`) as Record<string, unknown>;
     const exported = mod[`${name}Provider`];
     return isProvider(exported) ? exported : null;
