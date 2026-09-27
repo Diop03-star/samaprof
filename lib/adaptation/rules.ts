@@ -93,8 +93,13 @@ export function decide(input: DecideInput): AdaptiveDecision {
     MAX_DIFFICULTY
   );
 
+  // La suggestion de l'IA ne fournit le topic que lorsque les règles décident
+  // de passer à la suite. Sur `remediation`, `same_level` et
+  // `increase_difficulty`, le topic reste celui du learner : laisser l'IA le
+  // remplacer reviendrait à contourner les seuils, ce qu'interdit la règle
+  // centrale. Elle fournit `reason` et `nextActivity` dans tous les cas.
   const topic =
-    action === "remediation" ? currentTopic : (aiSuggestion?.topic ?? currentTopic);
+    action === "next_topic" ? (aiSuggestion?.topic ?? currentTopic) : currentTopic;
 
   return {
     action,

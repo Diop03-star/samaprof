@@ -178,3 +178,80 @@ describe("decide — cas limites", () => {
     expect(decision.difficulty).toBe(5);
   });
 });
+
+describe("decide — l'IA ne choisit le topic que pour next_topic", () => {
+  const suggestion = {
+    action: "next_topic" as const,
+    topic: "loops",
+    difficulty: 3,
+    reason: "Repeated errors detected",
+    nextActivity: "Practice: Basic if/else conditions",
+  };
+
+  it("next_topic => le topic nommé par l'IA est retenu", () => {
+    const decision = decide({
+      attempts: [],
+      aiSuggestion: suggestion,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.action).toBe("next_topic");
+    expect(decision.topic).toBe("loops");
+  });
+
+  it("next_topic sans suggestion => le topic courant est conservé", () => {
+    const decision = decide({
+      attempts: [],
+      aiSuggestion: null,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.action).toBe("next_topic");
+    expect(decision.topic).toBe("if/else conditions");
+  });
+
+  it("increase_difficulty => l'IA ne peut pas déplacer le learner", () => {
+    const decision = decide({
+      attempts: [a(95)],
+      aiSuggestion: suggestion,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.action).toBe("increase_difficulty");
+    expect(decision.topic).toBe("if/else conditions");
+  });
+
+  it("same_level => l'IA ne peut pas déplacer le learner", () => {
+    const decision = decide({
+      attempts: [a(60)],
+      aiSuggestion: suggestion,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.action).toBe("same_level");
+    expect(decision.topic).toBe("if/else conditions");
+  });
+
+  it("remediation => l'IA ne peut pas déplacer le learner", () => {
+    const decision = decide({
+      attempts: [a(20)],
+      aiSuggestion: suggestion,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.action).toBe("remediation");
+    expect(decision.topic).toBe("if/else conditions");
+  });
+
+  it("la suggestion ne change ni la raison ni l'activité en next_topic", () => {
+    const decision = decide({
+      attempts: [],
+      aiSuggestion: suggestion,
+      currentTopic: "if/else conditions",
+      currentDifficulty: 2,
+    });
+    expect(decision.reason).toBe("Repeated errors detected");
+    expect(decision.nextActivity).toBe("Practice: Basic if/else conditions");
+    expect(decision.source).toBe("rules");
+  });
+});
