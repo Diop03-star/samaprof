@@ -1,36 +1,33 @@
-﻿import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-import { createServiceClient } from "../lib/supabase/admin";
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+function createServiceClient(): SupabaseClient {
+  if (!supabaseServiceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY manquant : impossible de créer le client admin.");
+  }
+  return createClient(supabaseUrl, supabaseServiceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
 
 async function main() {
-  // Presence only: the values are never printed. The service_role key
-  // bypasses the RLS, and this script's output gets pasted into PR comments
-  // and CI logs, which are public on this repository.
   console.log("🔧 Vérification des variables d'environnement...");
-  console.log(
-    "   NEXT_PUBLIC_SUPABASE_URL  :",
-    process.env.NEXT_PUBLIC_SUPABASE_URL ? "définie" : "MANQUANTE"
-  );
-  console.log(
-    "   SUPABASE_SERVICE_ROLE_KEY :",
-    process.env.SUPABASE_SERVICE_ROLE_KEY ? "définie" : "MANQUANTE"
-  );
+  console.log("NEXT_PUBLIC_SUPABASE_URL:", process.env.NEXT_PUBLIC_SUPABASE_URL?.slice(0, 30) + "...");
+  console.log("SUPABASE_SERVICE_ROLE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY?.slice(0, 20) + "...");
 
-  if (
-    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project")
-  ) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL.includes("your-project")) {
     throw new Error("❌ NEXT_PUBLIC_SUPABASE_URL manquant ou invalide dans .env.local");
   }
-  if (
-    !process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY.includes("your-service")
-  ) {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY.includes("your-service")) {
     throw new Error("❌ SUPABASE_SERVICE_ROLE_KEY manquant ou invalide dans .env.local");
   }
 
-  const supabase: SupabaseClient = createServiceClient();
+  const supabase = createServiceClient();
   console.log("✅ Client Supabase admin créé");
+  console.log("   supabase.auth:", typeof supabase.auth);
+  console.log("   supabase.auth.admin:", typeof supabase.auth?.admin);
 
   console.log("\n🌱 Début du seed de démonstration...\n");
 
@@ -52,7 +49,7 @@ async function main() {
     userId = existingUser.id;
     console.log(`   ✓ Utilisateur déjà existant : ${userId}`);
   } else {
-    console.log("   Utilisateur non trouvé, création...");
+    console.log(`   Utilisateur non trouvé, création...`);
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
@@ -68,19 +65,6 @@ async function main() {
   await seedForUser(supabase, userId, fullName);
 }
 
-type ExerciseSeed = {
-  lesson_id: string;
-  kind: "qcm" | "code";
-  topic: string;
-  question: string;
-  options: string[] | null;
-  correct_answer: string | null;
-  explanation: string;
-  difficulty: number;
-  starter_code?: string;
-  reference_solution?: string;
-};
-
 async function seedForUser(supabase: SupabaseClient, userId: string, name: string) {
   // 2. Mettre à jour le profil (idempotent)
   console.log(`\n2. Mise à jour du profil pour ${name} (${userId})`);
@@ -95,17 +79,14 @@ async function seedForUser(supabase: SupabaseClient, userId: string, name: strin
   console.log("\n3. Upsert du learning_path (Python, beginner, 1h/jour, 30 jours)");
   const { data: pathData, error: pathError } = await supabase
     .from("learning_paths")
-    .upsert(
-      {
-        user_id: userId,
-        skill: "Python",
-        level: "beginner",
-        goal: "construire des applications",
-        daily_time: 60,
-        duration: 30,
-      },
-      { onConflict: "user_id" }
-    )
+    .upsert({
+      user_id: userId,
+      skill: "Python",
+      level: "beginner",
+      goal: "construire des applications",
+      daily_time: 60,
+      duration: 30,
+    }, { onConflict: "user_id" })
     .select("id")
     .single();
 
@@ -196,16 +177,15 @@ else:
   // 5. Exercices - select puis insert ou update pour chacun
   console.log("\n5. Exercices pour cette leçon");
 
-  const exercises: ExerciseSeed[] = [
+  const exercises = [
     {
       lesson_id: lessonId,
-      kind: "qcm",
+      kind: "qcm" as const,
       topic: "Syntaxe if/else",
       question: "Quel est le résultat de ce code ?\n\n```python\nx = 10\nif x > 5:\n    print('A')\nelse:\n    print('B')\n```",
       options: ["A", "B", "Erreur", "Rien"],
       correct_answer: "A",
-      explanation:
-        "La condition x > 5 est vraie (10 > 5), donc le bloc if s'exécute et affiche 'A'.",
+      explanation: "La condition x > 5 est vraie (10 > 5), donc le bloc if s'exécute et affiche 'A'.",
       difficulty: 1,
     },
     {
@@ -215,23 +195,22 @@ else:
       question: "Que se passe-t-il avec ce code ?\n\n```python\nage = 18\nif age = 18:\n    print('Majeur')\n```",
       options: ["Affiche 'Majeur'", "Erreur de syntaxe", "Ne fait rien", "Boucle infinie"],
       correct_answer: "Erreur de syntaxe",
-      explanation:
-        "En Python, `=` est l'opérateur d'affectation, pas de comparaison. La comparaison d'égalité s'écrit `==`. Ce code lève une SyntaxError car on ne peut pas affecter dans une condition if.",
+      explanation: "En Python, \`=\` est l'opérateur d'affectation, pas de comparaison. La comparaison d'égalité s'écrit \`==\`. Ce code lève une SyntaxError car on ne peut pas affecter dans une condition if.",
       difficulty: 2,
     },
     {
       lesson_id: lessonId,
-      kind: "code",
+      kind: "qcm" as const,
       topic: "Écrire une condition complète",
-      question:
-        "Écrivez un programme qui demande l'âge à l'utilisateur et affiche :\n- 'Mineur' si âge < 18\n- 'Majeur' si 18 ≤ âge < 65\n- 'Senior' si âge ≥ 65",
-      options: null,
-      correct_answer: null,
-      starter_code: "age = int(input('Votre âge : '))\n# Votre code ici",
-      reference_solution:
-        "age = int(input('Votre âge : '))\nif age < 18:\n    print('Mineur')\nelif age < 65:\n    print('Majeur')\nelse:\n    print('Senior')",
-      explanation:
-        "On utilise if/elif/else pour chaîner les conditions. L'ordre compte : on teste d'abord < 18, puis < 65 (ce qui implique ≥ 18), et le else capture ≥ 65.",
+      question: "Quel code affiche correctement 'Mineur', 'Majeur' ou 'Senior' selon l'âge ?",
+      options: [
+        "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')",
+        "if age < 18: print('Mineur')\nif age < 65: print('Majeur')\nif age >= 65: print('Senior')",
+        "if age < 18: print('Mineur')\nelif age >= 18 and age < 65: print('Majeur')\nelse: print('Senior')",
+        "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')"
+      ],
+      correct_answer: "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')",
+      explanation: "La bonne structure utilise if/elif/else pour chaîner les conditions mutuellement exclusives. L'ordre compte : on teste d'abord < 18, puis < 65 (ce qui implique ≥ 18), et le else capture ≥ 65. Les options 1, 3 et 4 sont syntaxiquement correctes mais l'option 4 est la plus idiomatique.",
       difficulty: 2,
     },
   ];
@@ -274,17 +253,14 @@ else:
   console.log("\n6. Upsert de la progression");
   const { error: progressError } = await supabase
     .from("progress")
-    .upsert(
-      {
-        user_id: userId,
-        path_id: pathId,
-        completed_lessons: 0,
-        total_lessons: 1,
-        mastery_score: 0,
-        current_level: 1,
-      },
-      { onConflict: "user_id" }
-    );
+    .upsert({
+      user_id: userId,
+      path_id: pathId,
+      completed_lessons: 0,
+      total_lessons: 1,
+      mastery_score: 0,
+      current_level: 1,
+    }, { onConflict: "user_id" });
 
   if (progressError) throw progressError;
   console.log("   ✓ Progression initialisée/mise à jour");
