@@ -1,5 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import { createClient, getCurrentUser } from "@/lib/supabase/server";
+import { createServerClient, getCurrentUser } from "@/lib/supabase/server";
 import { generateExercise } from "@/lib/ai";
 import type { ExerciseRow } from "@/types";
 
@@ -20,7 +20,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "lessonId is required" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   try {
     if (regenerate && topic) {

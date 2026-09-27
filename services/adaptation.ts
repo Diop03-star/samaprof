@@ -1,10 +1,10 @@
-﻿import { createClient } from "@/lib/supabase/server";
+﻿import { createServerClient } from "@/lib/supabase/server";
 import { suggestAdaptation } from "@/lib/ai";
 import { decide, type AttemptRecord } from "@/lib/adaptation/rules";
 import type { AdaptiveDecision, Level } from "@/types";
 
 export async function loadAttemptRecords(userId: string): Promise<AttemptRecord[]> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   const { data, error } = await supabase
     .from("attempts")

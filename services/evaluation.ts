@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server";
+﻿import { createServerClient } from "@/lib/supabase/server";
 import { evaluateAnswer, suggestAdaptation } from "@/lib/ai";
 import { decide } from "@/lib/adaptation/rules";
 import { loadAttemptRecords } from "./adaptation";
@@ -42,7 +42,7 @@ export async function submitAttempt(
   learnerAnswer: string,
   level: Level = "beginner"
 ): Promise<SubmitAttemptResult> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   const { data: exerciseData, error: exerciseError } = await supabase
     .from("exercises")
