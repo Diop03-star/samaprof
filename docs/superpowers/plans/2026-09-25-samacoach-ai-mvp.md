@@ -2151,7 +2151,11 @@ describe("computeMasteryScore", () => {
   });
 
   it("moyenne les 5 plus récents seulement", () => {
-    expect(computeMasteryScore([a(0), a(0), a(100), a(100), a(100), a(100), a(100)])).toBe(40);
+    // `attempts` est ordonné du plus récent au plus ancien : les 5 plus récents
+    // sont donc les 5 premiers, soit [0, 0, 100, 100, 100] → 300/5 = 60.
+    // La valeur 40 initialement prévue ici correspondait au tri inverse
+    // ([0, 0, 0, 100, 100]), contraire à la convention déclarée plus haut.
+    expect(computeMasteryScore([a(0), a(0), a(100), a(100), a(100), a(100), a(100)])).toBe(60);
   });
 
   it("moyenne les attempts existants si moins de 5", () => {
