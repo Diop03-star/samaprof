@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<html lang="fr"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_stack" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;700;800&family=DM+Sans:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@100..900&family=DM+Sans:wght@100..900&display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "tertiary-fixed-dim": "#d0bcff", "surface-variant": "#e0e3e5", "secondary-fixed-dim": "#bec6e0", "on-secondary-fixed": "#131b2e", "primary-fixed-dim": "#c0c1ff", "inverse-on-surface": "#eff1f3", "secondary-container": "#dae2fd", "inverse-primary": "#c0c1ff", "on-background": "#191c1e", "primary": "#4648d4", "surface-dim": "#d8dadc", "on-tertiary-fixed-variant": "#5516be", "on-error": "#ffffff", "outline-variant": "#c7c4d7", "error": "#ba1a1a", "on-secondary": "#ffffff", "surface-container-low": "#f2f4f6", "on-surface-variant": "#464554", "tertiary-fixed": "#e9ddff", "on-error-container": "#93000a", "background": "#f7f9fb", "on-primary-container": "#fffbff", "on-primary": "#ffffff", "on-secondary-container": "#5c647a", "on-tertiary": "#ffffff", "on-tertiary-fixed": "#23005c", "on-surface": "#191c1e", "inverse-surface": "#2d3133", "primary-fixed": "#e1e0ff", "secondary": "#565e74", "error-container": "#ffdad6", "tertiary": "#6b38d4", "on-primary-fixed": "#07006c", "surface-bright": "#f7f9fb", "on-tertiary-container": "#fffbff", "surface": "#f7f9fb", "surface-tint": "#494bd6", "tertiary-container": "#8455ef", "outline": "#767586", "surface-container-highest": "#e0e3e5", "primary-container": "#6063ee", "on-primary-fixed-variant": "#2f2ebe", "surface-container-high": "#e6e8ea", "surface-container": "#eceef0", "secondary-fixed": "#dae2fd", "on-secondary-fixed-variant": "#3f465c", "surface-container-lowest": "#ffffff" }, borderRadius: { "DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px" }, spacing: { "margin-mobile": "1rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter": "1.5rem", "space-xl": "2.5rem", "margin": "2rem", "space-md": "1rem", "gutter-mobile": "1rem", "space-lg": "1.5rem" }, fontFamily: { "label-md": ["DM Sans"], "body-lg": ["DM Sans"], "display-lg-mobile": ["Bricolage Grotesque"], "headline-md": ["Bricolage Grotesque"], "headline-lg-mobile": ["Bricolage Grotesque"], "label-sm": ["DM Sans"], "display-lg": ["Bricolage Grotesque"], "title-md": ["DM Sans"], "body-md": ["DM Sans"], "headline-sm": ["Bricolage Grotesque"], "headline-lg": ["Bricolage Grotesque"] }, fontSize: { "label-md": ["13px", { "lineHeight": "18px", "letterSpacing": "0.01em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }], "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "800" }], "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "headline-lg-mobile": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.015em", "fontWeight": "700" }], "label-sm": ["11px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "600" }], "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "800" }], "title-md": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "600" }], "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }], "headline-sm": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }] } } } }</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-gutter-mobile flex items-center justify-between"><div class="flex items-center gap-space-sm"><button aria-label="Retour" class="w-11 h-11 flex items-center justify-center rounded-full text-on-surface hover:bg-surface-container transition-colors" onclick="history.back()"><span class="material-symbols-outlined text-[24px]">arrow_back</span></button><img alt="SamaProf AI Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1XO5ghl-YQ0A_Ti819YFQ1JwulI4bPdAqv4-VPzlzcn_t1v1prk4XKVae5_lcDeLsM_04C7ueCAOY0jlY6FzrFLisg7Z7GgiHQH1BwxGsROBR5vMcIGTKjCas5ZTBjx5N4lP-rQlp4mj7cZsyfivlhplfhj1E27NG1g-gILDvERrPDVIny5P57a6R9epKqYnZITrMQ_ZmLFGR5y5Zw1RFNdFH-Sm0QS4yCur-R24zkBGtqa_72fbwKlHA"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm text-on-surface leading-tight">Détail De Leçon</span></div></div><div class="flex items-center gap-space-sm"><img alt="Profile" class="w-8 h-8 rounded-full object-cover ring-2 ring-primary/20" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATz8ddk2lC1RuadoWW-WRrfectHdoPZwo0xYkJ0tk5kBIm5oLznFTlbl6AAyDqT4F9AI1MyV_7Iw_LGTYwU-DWINkZ2IeBVcHGlXARM3NCjGNdMpMZs5DcDr-mjfouet5hBL9YAAn3VJIvjQKyfa4XDCvPOadbLp__M9tw1ZPijytts2l21H2qoMAZYYgwVY9LfoPUhA_d8Pgi2bIlI0hhMSfboU6ke9JRAV3XrT80GHW3MDo5jwgL"/><span class="sr-only">Amadou Diop</span></div></div></header><main class="flex flex-col relative w-full pt-16 pb-safe bg-surface flex-1"><div class="flex flex-col w-full">
+<!-- Progression & Metadata Sticky Strip -->
+<div class="sticky top-16 z-40 bg-surface/90 backdrop-blur-md px-margin-mobile pt-space-xs pb-space-sm shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-secondary uppercase tracking-wider font-semibold">
+        Leçon 12 / 30 · Python Fondamentaux
+      </span>
+<span class="font-label-sm text-label-sm font-bold text-primary">
+        40% complété
+      </span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary rounded-full transition-all duration-500 ease-out" style="width: 40%;"></div>
+</div>
+</div>
+<!-- Main Lesson Flow -->
+<div class="px-margin-mobile py-space-md flex flex-col gap-space-lg pb-32">
+<!-- Header Block -->
+<div class="flex flex-col gap-space-sm">
+<div class="flex flex-wrap items-center gap-space-xs">
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+          15 min
+        </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">analytics</span>
+          Niveau Débutant / Intermédiaire
+        </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-tertiary-fixed text-on-tertiary-fixed font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+          Adapté à vos objectifs
+        </span>
+</div>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mt-space-xs">
+        Comprendre les boucles (for & while)
+      </h1>
+</div>
+<!-- Pédagogie Narrative Card -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">psychology</span>
+</div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">
+          Qu'est-ce qu'une boucle en programmation ?
+        </h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Imaginez que vous deviez distribuer 50 invitations de fête une par une. Plutôt que d'écrire cinquante instructions distinctes à la main, vous dites simplement : <em class="text-primary font-medium">« Tant qu'il reste des invités, envoie une lettre »</em>.
+      </p>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        En informatique, la <strong class="text-on-surface font-semibold">boucle</strong> est votre meilleur super-pouvoir. Elle permet d'automatiser des suites d'actions répétitives avec une élégance absolue, sans jamais réécrire le même bout de code.
+      </p>
+<!-- Visual Imagery Micro-Hero for Engagement -->
+<div class="mt-space-xs relative overflow-hidden rounded-md h-36 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Digital concept illustration showing repetitive orbital rings and glowing pathways in deep indigo and violet tones, representing programmed iterative cycles and automation in a clean warm pedagogical minimalist style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEZNg9oQxaVQ4gQtjcEr4ZUURn-9ilPm4gtBNnKiEDLdCdtVYF_KQfMPsf6znQuf1HxbfRWbczCdSM7wgki0XRTox3ejZ9imTn3UkGrppXUtSL168BnmfporpToZfIlWSkTR85a0IJBAGfXoJQIYHBfFUOtFCZhNJefCyPJ2B7QPi1x2u_WaR_Xk1siqoBw3CmQRaJGxYXBqrSURknbOGmTZp__vJchqRG6F64Yx2Yb6UqoyUoOPmi"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent flex items-end p-space-sm">
+<span class="text-inverse-on-surface font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">sync</span>
+            Le principe d'itération perpétuelle et contrôlée
+          </span>
+</div>
+</div>
+</div>
+<!-- Code Display Section -->
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between px-space-xs">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[18px]">terminal</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Exemple en Python 3</span>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm">
+          script.py
+        </span>
+</div>
+<!-- Modern Dark Editor Container -->
+<div class="bg-inverse-surface text-inverse-on-surface rounded-lg p-space-md shadow-md flex flex-col font-mono text-sm leading-relaxed overflow-x-auto relative">
+<div class="flex items-center gap-1.5 mb-3 opacity-60">
+<div class="w-2.5 h-2.5 rounded-full bg-error"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-secondary-fixed"></div>
+<div class="w-2.5 h-2.5 rounded-full bg-primary-fixed-dim"></div>
+</div>
+<pre class="overflow-x-auto"><span class="text-outline-variant italic"># Afficher les nombres de 0 à 4</span>
+<span class="text-tertiary-fixed-dim font-semibold">for</span> <span class="text-primary-fixed">i</span> <span class="text-tertiary-fixed-dim font-semibold">in</span> <span class="text-secondary-fixed">range</span>(<span class="text-primary-fixed-dim">5</span>):
+    <span class="text-secondary-fixed">print</span>(<span class="text-tertiary-fixed">f</span><span class="text-primary-fixed-dim">"Tour numéro : </span><span class="text-tertiary-fixed">{i}</span><span class="text-primary-fixed-dim">"</span>)</pre>
+</div>
+</div>
+<!-- Step-by-Step Execution Simulator Component -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]">account_tree</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Visualisation pas à pas</h3>
+</div>
+<span class="font-label-sm text-label-sm text-on-tertiary-fixed-variant bg-tertiary-fixed px-2 py-0.5 rounded-full">
+          Dynamique
+        </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Découvrez comment l'ordinateur fait évoluer la variable <code class="bg-surface-container px-1.5 py-0.5 rounded text-primary font-bold">i</code> à chaque cycle de répétition :
+      </p>
+<!-- Stepper Visualizer -->
+<div class="flex flex-col gap-space-sm" id="execution-flow">
+<!-- Step 1 -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-DEFAULT bg-surface-container-low transition-all">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center shrink-0">
+            1
+          </div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Étape 1 : i = 0</span>
+<span class="font-label-sm text-label-sm text-primary">Tour initial</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Affiche : <span class="font-mono text-primary font-medium bg-surface-container-highest px-1.5 py-0.2 rounded">Tour numéro : 0</span>
+</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-DEFAULT bg-surface-container-low transition-all">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center shrink-0">
+            2
+          </div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Étape 2 : i = 1</span>
+<span class="font-label-sm text-label-sm text-secondary">Incrément +1</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Affiche : <span class="font-mono text-primary font-medium bg-surface-container-highest px-1.5 py-0.2 rounded">Tour numéro : 1</span>
+</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-DEFAULT bg-surface-container-low transition-all">
+<div class="w-7 h-7 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center shrink-0">
+            3
+          </div>
+<div class="flex flex-col min-w-0 flex-1">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md text-on-surface font-semibold">Étape 3 : i = 2</span>
+<span class="font-label-sm text-label-sm text-secondary">Incrément +1</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-0.5">
+              Affiche : <span class="font-mono text-primary font-medium bg-surface-container-highest px-1.5 py-0.2 rounded">Tour numéro : 2</span>
+</p>
+</div>
+</div>
+<!-- Step Final Termination -->
+<div class="flex items-start gap-space-sm p-space-sm rounded-DEFAULT bg-secondary-container/40">
+<div class="w-7 h-7 rounded-full bg-secondary text-on-secondary font-label-md text-label-md flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">stop</span>
+</div>
+<div class="flex flex-col min-w-0 flex-1">
+<span class="font-label-md text-label-md text-on-secondary-container font-semibold">Arrêt automatique</span>
+<p class="font-body-md text-body-md text-on-secondary-container mt-0.5">
+              Le tour s'achève à <code class="font-mono font-bold">i = 4</code> (5 itérations au total). À 5, la condition de fin est atteinte et le programme poursuit !
+            </p>
+</div>
+</div>
+</div>
+</div>
+<!-- À Retenir (Key Takeaway) Component -->
+<div class="bg-primary-fixed p-space-md rounded-lg flex gap-space-sm shadow-sm">
+<div class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shrink-0 shadow-sm">
+<span class="material-symbols-outlined text-[22px]" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+</div>
+<div class="flex flex-col min-w-0">
+<h4 class="font-title-md text-title-md text-on-primary-fixed font-bold">
+          À retenir
+        </h4>
+<p class="font-body-md text-body-md text-on-primary-fixed-variant mt-1 leading-relaxed">
+          Une boucle permet de répéter un bloc d'instructions de manière automatique sans copier-coller de lignes de code.
+        </p>
+</div>
+</div>
+<!-- Note de l'IA Personalized Coach Card -->
+<div class="bg-surface-container-highest p-space-md rounded-lg flex flex-col gap-space-sm shadow-sm relative overflow-hidden">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover shadow-sm" data-alt="Close-up portrait of a friendly African mentor coach in a modern tech lab smiling warmly with soft ambient indigo lighting and clean design" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBUaQhKpLELpjdQ1rjsPSHbyNG64tlijy_NbkW9TcfqP1x_h3bFFmQu79pvDZJ1PfqjTSXB5xCfQveg7xO5v78RryIJxk3DrfAtWx6PeEU5IqwM8tr9pouADjMvb6K3icUXcHlQ0pjkIWOX8F0-xzcx5lPJpA1PuMtoy7EcXBbjgoneN0NTCPEBzojyBrsJROQ4D3JhtZCZFFOVKK1nCxQBwkgU_1Wt5pSunxBrPYKqn8wtB_JMLeB2"/>
+<span class="absolute -bottom-1 -right-1 w-4 h-4 bg-tertiary rounded-full flex items-center justify-center text-on-tertiary">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">arrow_back_ios_new</span>
+</span>
+</div>
+<div class="flex flex-col">
+<span class="font-title-md text-title-md text-on-surface font-bold leading-tight">Note de SamaProf AI</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold">Conseil personnalisé</span>
+</div>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant italic pl-space-xs border-l-0">
+        « Ce concept est indispensable pour votre prochain projet d'application Python. Prenez le temps de bien tester vos indices ! »
+      </p>
+</div>
+</div>
+<!-- Bottom Floating Action Bar -->
+<div class="fixed bottom-0 left-0 right-0 z-50 p-margin-mobile bg-surface/90 backdrop-blur-xl shadow-lg flex flex-col pb-safe">
+<button class="w-full py-3.5 px-6 rounded-full bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-space-sm shadow-md active:scale-95 transition-transform" id="btn-action-start">
+<span>Je suis prêt pour l'exercice pratique</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+  (function() {
+    const actionBtn = document.getElementById('btn-action-start');
+    if (actionBtn) {
+      actionBtn.addEventListener('click', function() {
+        actionBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          <span>Préparation de l'exercice...</span>
+        `;
+        setTimeout(() => {
+          actionBtn.classList.remove('bg-primary');
+          actionBtn.classList.add('bg-tertiary');
+          actionBtn.innerHTML = `
+            <span>C'est parti !</span>
+            <span class="material-symbols-outlined text-[18px]">check_circle</span>
+          `;
+        }, 800);
+      });
+    }
+  })();
+</script></main></body></html>
