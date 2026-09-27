@@ -25,7 +25,7 @@
 - Seuils d'adaptation : `score < 40` → `remediation` ; `40 ≤ score < 75` → `same_level` ; `score ≥ 75` → `increase_difficulty`.
 - `masteryScore` = moyenne des `score` des **5** derniers `attempts`, du plus récent au plus ancien. 0 attempt → `next_topic`.
 - 6 tables exactement : `profiles`, `learning_paths`, `lessons`, `exercises`, `attempts`, `progress`. Aucune autre.
-- RLS sur les 6 tables, policy unique fondée sur `auth.uid()`.
+- RLS sur les 6 tables, chaque policy fondée sur `auth.uid()`. `lessons` et `exercises` ont une policy par opération (`select`, `insert`, `update`) car les services écrivent avec le client de l'utilisateur.
 - On ne travaille jamais sur `main`. Branche courante : `feature/<nom>`.
 - Préfixes de commit : `feat:`, `fix:`, `ui:`, `ai:`, `db:`, `test:`, `refactor:`, `docs:`.
 - **Critère de non-régression principal** : le parcours fonctionne intégralement avec `AI_PROVIDER` absent.
@@ -313,7 +313,12 @@ create index if not exists attempts_user_created_idx on public.attempts (user_id
 create index if not exists exercises_lesson_idx on public.exercises (lesson_id);
 create index if not exists lessons_path_idx on public.lessons (path_id);
 create index if not exists learning_paths_user_idx on public.learning_paths (user_id);
-create index if not exists progress_user_idx on public.progress (user_id);
+
+-- UNIQUE, et pas seulement indexé : `progress` est un état courant unique par
+-- utilisateur. Les .upsert({ onConflict: "user_id" }) du seed et de
+-- services/learning-path s'appuient sur cette contrainte — Postgres refuse
+-- `ON CONFLICT (user_id)` si aucun index unique ne correspond.
+create unique index if not exists progress_user_unique_idx on public.progress (user_id);
 
 -- Provisionnement automatique du profil à l'inscription
 create or replace function public.handle_new_user()
@@ -372,9 +377,66 @@ create policy "own lessons" on public.lessons
     )
   );
 
+-- INSERT et UPDATE sont nécessaires : createLearningPath insère les leçons,
+-- ensureLessonContent les complète au fil de l'eau, et les deux passent par le
+-- client authentifié de l'utilisateur, donc soumis à la RLS. Sans ces policies
+-- l'onboarding échoue sur « new row violates row-level security policy ».
+drop policy if exists "insert own lessons" on public.lessons;
+create policy "insert own lessons" on public.lessons
+  for insert with check (
+    exists (
+      select 1 from public.learning_paths lp
+      where lp.id = lessons.path_id and lp.user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "update own lessons" on public.lessons;
+create policy "update own lessons" on public.lessons
+  for update using (
+    exists (
+      select 1 from public.learning_paths lp
+      where lp.id = lessons.path_id and lp.user_id = auth.uid()
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.learning_paths lp
+      where lp.id = lessons.path_id and lp.user_id = auth.uid()
+    )
+  );
+
 drop policy if exists "own exercises" on public.exercises;
 create policy "own exercises" on public.exercises
   for select using (
+    exists (
+      select 1 from public.lessons l
+      join public.learning_paths lp on lp.id = l.path_id
+      where l.id = exercises.lesson_id and lp.user_id = auth.uid()
+    )
+  );
+
+-- Même raison que pour les leçons : generateExercise insère via le client de
+-- l'utilisateur.
+drop policy if exists "insert own exercises" on public.exercises;
+create policy "insert own exercises" on public.exercises
+  for insert with check (
+    exists (
+      select 1 from public.lessons l
+      join public.learning_paths lp on lp.id = l.path_id
+      where l.id = exercises.lesson_id and lp.user_id = auth.uid()
+    )
+  );
+
+drop policy if exists "update own exercises" on public.exercises;
+create policy "update own exercises" on public.exercises
+  for update using (
+    exists (
+      select 1 from public.lessons l
+      join public.learning_paths lp on lp.id = l.path_id
+      where l.id = exercises.lesson_id and lp.user_id = auth.uid()
+    )
+  )
+  with check (
     exists (
       select 1 from public.lessons l
       join public.learning_paths lp on lp.id = l.path_id
@@ -414,7 +476,17 @@ where schemaname = 'public'
 order by tablename;
 ```
 
-Expected: 6 policies, `own profiles`, `own learning_paths`, `own progress`, `own attempts`, `own lessons`, `own exercises`.
+Expected: 10 policies — `own profiles`, `own learning_paths`, `own progress`, `own attempts` (une chacune, `for all`), plus `own lessons`, `insert own lessons`, `update own lessons`, `own exercises`, `insert own exercises`, `update own exercises`.
+
+Vérifier aussi l'index unique qui porte les `upsert` de `progress` :
+
+```sql
+select indexname, indexdef
+from pg_indexes
+where schemaname = 'public' and tablename = 'progress';
+```
+
+Expected: une ligne contenant `progress_user_unique_idx` et `UNIQUE`. Si `indexdef` ne contient pas `UNIQUE`, le seed échouera sur `ON CONFLICT (user_id)`.
 
 - [ ] **Step 5: Commit**
 
@@ -5009,7 +5081,9 @@ Expected: parcours identique. C'est la procédure à utiliser si Vercel est indi
 
 - [ ] **Step 6: Écrire `README.md`**
 
-```markdown
+Le README contient lui-même des blocs de code, donc le fence externe utilise quatre backticks.
+
+````markdown
 # SamaCoach AI
 
 Your learning path. Your pace. Your AI coach.
@@ -5081,17 +5155,50 @@ du conseil affiché. Voir `tests/adaptation-rules.test.ts`.
 6. QCM `if/else` → répondre **faux** volontairement
 7. Correction IA : score 35 %, faiblesse `if/else conditions` détectée
 8. `Start recommended activity` → exercice plus facile sur la même faiblesse
-```
+````
 
-- [ ] **Step 7: Commit final**
+- [ ] **Step 7: Fusionner les 15 branches dans `develop`**
+
+Les tâches créent chacune une branche `feature/*` et n'y committent que leurs propres fichiers. On les fusionne donc dans un ordre qui respecte les dépendances — une étape ne peut pas être fusionnée si une tâche dont elle dépend ne l'est pas encore.
 
 ```bash
 git checkout develop
-git merge --no-ff feature/progress
-git checkout develop
-git merge --no-ff feature/correction
-git checkout develop
+
+# Couche fondatrice : projet, données, auth, contrat IA
+git merge --no-ff feature/scaffold
+git merge --no-ff feature/db-schema
+git merge --no-ff feature/auth
+git merge --no-ff feature/ai-contract
+
+# Services purs et couche IA
+git merge --no-ff feature/ai-fallback
+git merge --no-ff feature/adaptation-rules
+git merge --no-ff feature/ai-providers
+
+# Données de démo
+git merge --no-ff feature/seed
+
+# Écrans, par ordre de dépendance de données
 git merge --no-ff feature/api
+git merge --no-ff feature/landing
+git merge --no-ff feature/onboarding
+git merge --no-ff feature/dashboard
+git merge --no-ff feature/lesson-qcm
+git merge --no-ff feature/correction
+git merge --no-ff feature/progress
+```
+
+Expected: 15 fusions `--no-ff`, sans conflit. En cas de conflit sur un même fichier, le bon état est celui de la tâche la plus tardive, puisque chaque étape n'édite que ses propres fichiers — sauf `services/learning-plan.ts` et `services/adaptation.ts`, réécrits successivement par les Tasks 8, 15 et 16 : c'est la version de la Task 16 qui fait foi.
+
+```bash
+git status
+npm run typecheck
+npm run test
+```
+
+Expected: arbre de travail propre, `tsc` sans erreur, suite complète au vert. Puis :
+
+```bash
 git push -u origin develop
 ```
 
@@ -5118,3 +5225,14 @@ Vérifications effectuées sur ce document après rédaction, et corrections app
 | Task 15 : deux requêtes Supabase identiques vers `attempts` pour lire l'attempt et son exercice | Fusionnées en une seule requête avec `exercises(...)` |
 | Task 15 : variable nommée `params2` | Renommée `remediationQuery` |
 | Task 15 : les numéros d'étapes sautaient de 1 à 3 après la suppression d'étape | Renumérotés 1 à 4 |
+
+### Défauts trouvés lors de la revue pré-vol, avant exécution
+
+Ces trois points cassaient l'application à l'exécution. Corrigés dans le plan, pas au fil de l'eau.
+
+| Défaut | Symptôme | Correction |
+|---|---|---|
+| `progress` n'avait qu'un index simple sur `user_id`, alors que le seed et `createLearningPath` font `.upsert({ onConflict: "user_id" })` | Postgres rejette : *there is no unique or exclusion constraint matching the ON CONFLICT specification* — le seed échoue | `progress_user_unique_idx` passe en `create unique index`, et la Task 2Step 4 vérifie que `indexdef` contient bien `UNIQUE` |
+| `lessons` et `exercises` n'avaient qu'une policy `for select`, alors que `createLearningPath` insère des leçons, `ensureLessonContent` les met à jour et `generateExercise` insère un exercice — via le client authentifié de l'utilisateur | *new row violates row-level security policy* — l'onboarding est mort | Policies `insert` et `update` ajoutées sur les deux tables, avec `with check` sur la propriété via `learning_paths` |
+| La Task 17 ne fusionnait que 3 des 15 branches `feature/*` créées par le plan | Scaffold, schéma, auth, contrat IA, fallback, règles, providers, seed, landing, onboarding, dashboard et leçon disparaissent du livrable | Les 15 branches sont fusionnées dans l'ordre des dépendances, avec `typecheck` et `test` rejoués après coup |
+| Le fence du README en Task 17 Step 6 était en 3 backticks alors que son contenu contient des fences ` ```bash ` — le README était tronqué au rendu et toute la suite du document était décalée d'un niveau | Rendu markdown cassé à partir de la Task 17 | Fence externe passé à 4 backticks ; les 248 fences du document sont maintenant équilibrés et aucun n'est imbriqué |
