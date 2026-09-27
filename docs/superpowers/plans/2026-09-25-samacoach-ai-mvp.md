@@ -180,6 +180,14 @@ Remplacer `scripts` dans `package.json` :
 
 Créer `vitest.config.ts` :
 
+> **Pourquoi `process.cwd()` et pas `__dirname`** : ce fichier est écrit en syntaxe ESM
+> alors que `package.json` ne déclare pas `"type": "module"`. Vite le charge donc en
+> CommonJS, et `__dirname` n'existe que par cet accident — d'où l'avertissement
+> `configLoader: 'native'` à chaque `npm run test`. Les deux remèdes évidents
+> (`vitest.config.mts`, ou ajout de `"type": "module"`) suppriment `__dirname` et font
+> échouer la suite complète. `process.cwd()` vaut le racine projet sous tout chargeur
+> et supprime l'avertissement.
+
 ```typescript
 import { defineConfig } from "vitest/config";
 import path from "node:path";
@@ -190,7 +198,7 @@ export default defineConfig({
     include: ["tests/**/*.test.ts"],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, ".") },
+    alias: { "@": path.resolve(process.cwd(), ".") },
   },
 });
 ```
@@ -209,6 +217,27 @@ describe("harnais de test", () => {
 });
 ```
 
+Créer `tests/alias.test.ts` — l'unique ligne de config sur laquelle passent tous les
+imports des 16 tâches suivantes mérite un test qui échoue en clair si elle regresse :
+
+```typescript
+import { describe, it, expect } from "vitest";
+import path from "node:path";
+import config from "../vitest.config";
+
+describe("alias @", () => {
+  it("pointe sur la racine du projet, pas sur __dirname", () => {
+    const alias = (config.resolve?.alias ?? {}) as Record<string, string>;
+    expect(alias["@"]).toBe(path.resolve(process.cwd(), "."));
+  });
+});
+```
+
+> Ce test épingle la correction : tout retour à `__dirname` le fait échouer. Il porte
+> sur la config et non sur un import réel, parce qu'aucun module de `lib/` n'existe
+> avant la Task 3. La Task 3 importe `lib/supabase/server` via `@/` dans ses propres
+> tests, ce qui couvre le côté résolution réelle.
+
 - [ ] **Step 9: Vérifier**
 
 ```bash
@@ -216,7 +245,7 @@ npm run test
 npm run typecheck
 ```
 
-Expected: 1 test passé, `tsc` sans sortie.
+Expected: 2 tests passés (1 smoke + 1 alias), `tsc` sans sortie.
 
 - [ ] **Step 10: Branche et commit**
 
@@ -2016,7 +2045,7 @@ npm run test
 npm run typecheck
 ```
 
-Expected: 43 tests passés (1 smoke + 7 onboarding + 24 validate + 5 fallback + 6 scénario démo), `tsc` propre.
+Expected: 44 tests passés (2 harnais + 7 onboarding + 24 validate + 5 fallback + 6 scénario démo), `tsc` propre.
 
 - [ ] **Step 9: Commit**
 
@@ -5218,7 +5247,7 @@ Vérifications effectuées sur ce document après rédaction, et corrections app
 
 | Défaut | Correction |
 |---|---|
-| Step 8 de la Task 5 attendait « 40 tests passés … recalculer selon le nombre réel de `it` » — un placeholder | Décompte explicite : 43 tests (1 + 7 + 24 + 5 + 6) |
+| Step 8 de la Task 5 attendait « 40 tests passés … recalculer selon le nombre réel de `it` » — un placeholder | Décompte explicite : 44 tests (2 + 7 + 24 + 5 + 6) |
 | La contrainte globale RLS contenait des caractères non latins glissés dans la phrase sur `auth.uid()` | Remplacée par « policy unique fondée sur `auth.uid()` » |
 | Task 13 : le fichier `code-exercise.tsx` était présenté sans son `import { useState }`, avec une phrase correctrice séparée | L'import est intégré dans le code, la phrase supprimée |
 | Task 15 : `getExerciseFor` était défini dans `services/lesson.ts` puis importé sans être appelé — du code mort et une erreur de lint | Étape supprimée ; la page lit l'exercice via le join sur `attempts` et l'import inutile disparaît |
@@ -5236,3 +5265,9 @@ Ces trois points cassaient l'application à l'exécution. Corrigés dans le plan
 | `lessons` et `exercises` n'avaient qu'une policy `for select`, alors que `createLearningPath` insère des leçons, `ensureLessonContent` les met à jour et `generateExercise` insère un exercice — via le client authentifié de l'utilisateur | *new row violates row-level security policy* — l'onboarding est mort | Policies `insert` et `update` ajoutées sur les deux tables, avec `with check` sur la propriété via `learning_paths` |
 | La Task 17 ne fusionnait que 3 des 15 branches `feature/*` créées par le plan | Scaffold, schéma, auth, contrat IA, fallback, règles, providers, seed, landing, onboarding, dashboard et leçon disparaissent du livrable | Les 15 branches sont fusionnées dans l'ordre des dépendances, avec `typecheck` et `test` rejoués après coup |
 | Le fence du README en Task 17 Step 6 était en 3 backticks alors que son contenu contient des fences ` ```bash ` — le README était tronqué au rendu et toute la suite du document était décalée d'un niveau | Rendu markdown cassé à partir de la Task 17 | Fence externe passé à 4 backticks ; les 248 fences du document sont maintenant équilibrés et aucun n'est imbriqué |
+
+### Défauts trouvés par la revue de la Task 1, après le début de l'exécution
+
+| Défaut | Symptôme | Correction |
+|---|---|---|
+| `vitest.config.ts` resolvait l'alias `@` avec `__dirname`, dans un fichier en syntaxe ESM sans `"type": "module"` | Vite charge la config en CommonJS, d'où un avertissement `configLoader: 'native'` à chaque `npm run test` ; `__dirname` n'existe que par cet accident. Les deux remèdes naturels (renommer en `.mts`, ajouter `"type": "module"`) suppriment `__dirname` et font échouer toute la suite | `path.resolve(process.cwd(), ".")`, valable sous tout chargeur ; `tests/alias.test.ts` épingle le correctif ; décompte de tests porté à 44 |
