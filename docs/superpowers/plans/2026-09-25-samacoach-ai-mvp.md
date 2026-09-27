@@ -182,11 +182,16 @@ Créer `vitest.config.ts` :
 
 > **Pourquoi `process.cwd()` et pas `__dirname`** : ce fichier est écrit en syntaxe ESM
 > alors que `package.json` ne déclare pas `"type": "module"`. Vite le charge donc en
-> CommonJS, et `__dirname` n'existe que par cet accident — d'où l'avertissement
-> `configLoader: 'native'` à chaque `npm run test`. Les deux remèdes évidents
-> (`vitest.config.mts`, ou ajout de `"type": "module"`) suppriment `__dirname` et font
-> échouer la suite complète. `process.cwd()` vaut le racine projet sous tout chargeur
-> et supprime l'avertissement.
+> CommonJS, et `__dirname` n'existe que par cet accident. Les deux remèdes évidents
+> (`vitest.config.mts`, ou ajout de `"type": "module"`) suppriment `__dirname` et ont
+> été testés : ils lèvent `ReferenceError: __dirname is not defined` et font échouer la
+> suite complète. `process.cwd()` vaut le racine projet sous tout chargeur.
+>
+> Ce que ce changement corrige : la dépendance à un global propre au CommonJS. Ce
+> qu'il ne corrige pas : l'avertissement `configLoader: 'native'`, qui porte sur la
+> façon dont Vite charge le fichier (il vise `vitest.config.ts:1:1`, la ligne d'import,
+> pas l'alias) et qui exige les deux remèdes interdits pour disparaître. Il est
+> cosmétique, il est laissé en place tel quel.
 
 ```typescript
 import { defineConfig } from "vitest/config";
@@ -217,8 +222,8 @@ describe("harnais de test", () => {
 });
 ```
 
-Créer `tests/alias.test.ts` — l'unique ligne de config sur laquelle passent tous les
-imports des 16 tâches suivantes mérite un test qui échoue en clair si elle regresse :
+Créer `tests/alias.test.ts` — garde-fou sur la cible de l'alias `@`, la ligne de config
+dont dépendent tous les imports des 16 tâches suivantes :
 
 ```typescript
 import { describe, it, expect } from "vitest";
@@ -226,17 +231,19 @@ import path from "node:path";
 import config from "../vitest.config";
 
 describe("alias @", () => {
-  it("pointe sur la racine du projet, pas sur __dirname", () => {
+  it("pointe sur la racine du projet", () => {
     const alias = (config.resolve?.alias ?? {}) as Record<string, string>;
     expect(alias["@"]).toBe(path.resolve(process.cwd(), "."));
   });
 });
 ```
 
-> Ce test épingle la correction : tout retour à `__dirname` le fait échouer. Il porte
-> sur la config et non sur un import réel, parce qu'aucun module de `lib/` n'existe
-> avant la Task 3. La Task 3 importe `lib/supabase/server` via `@/` dans ses propres
-> tests, ce qui couvre le côté résolution réelle.
+> Ce test vérifie la **cible** de l'alias, pas le mécanisme. Il échouerait si `@` était
+> repointé ailleurs, mais il ne peut pas distinguer `__dirname` de `process.cwd()` : les
+> deux valent le même chemin ici, la config étant à la racine du dépôt. C'est mesuré, pas
+> supposé. Il porte sur la config et non sur un import réel, parce qu'aucun module de
+> `lib/` n'existe avant la Task 3 ; la Task 3 importe `lib/supabase/server` via `@/` dans
+> ses propres tests, ce qui couvre le côté résolution réelle.
 
 - [ ] **Step 9: Vérifier**
 
@@ -5270,4 +5277,19 @@ Ces trois points cassaient l'application à l'exécution. Corrigés dans le plan
 
 | Défaut | Symptôme | Correction |
 |---|---|---|
-| `vitest.config.ts` resolvait l'alias `@` avec `__dirname`, dans un fichier en syntaxe ESM sans `"type": "module"` | Vite charge la config en CommonJS, d'où un avertissement `configLoader: 'native'` à chaque `npm run test` ; `__dirname` n'existe que par cet accident. Les deux remèdes naturels (renommer en `.mts`, ajouter `"type": "module"`) suppriment `__dirname` et font échouer toute la suite | `path.resolve(process.cwd(), ".")`, valable sous tout chargeur ; `tests/alias.test.ts` épingle le correctif ; décompte de tests porté à 44 |
+| `vitest.config.ts` resolvait l'alias `@` avec `__dirname`, dans un fichier en syntaxe ESM sans `"type": "module"` | `__dirname` n'existait que parce que Vite chargeait la config en CommonJS ; les deux remèdes naturels (`.mts`, `"type": "module"`) le font.throw `ReferenceError` et cassent toute la suite | `path.resolve(process.cwd(), ".")`, valable sous tout chargeur ; `tests/alias.test.ts` garde la cible de l'alias ; décompte de tests porté à 44 |
+
+### Précisions issues de l'application réelle de ce correctif
+
+Deux affirmations se sont révélées fausses à l'exécution, et sont corrigées ci-dessus
+dans la Task 1 :
+
+- `process.cwd()` **ne supprime pas** l'avertissement `configLoader: 'native'`. Celui-ci
+  vise `vitest.config.ts:1:1` — la façon dont Vite charge le fichier — pas l'alias. Il
+  resterait identique avec `__dirname` restauré, ce qui a été vérifié. Le corriger
+  exigerait `"type": "module"` ou `.mts`, tous deux interdits ici. L'avertissement est
+  cosmétique et est assumé.
+- `tests/alias.test.ts` **ne peut pas** épingler le mécanisme `__dirname` vs
+  `process.cwd()` : les deux résolvent le même chemin, la config étant à la racine du
+  dépôt. L'expérience de revert retourne 2 tests verts. Le test garde la cible de
+  l'alias, pas sa formule.
