@@ -29,7 +29,7 @@ Répartition des tâches :
 | Member 2 | IA / NVIDIA | 4, 5, 6, 9 |
 | Member 3 | Frontend / UX / QA | 10, 11, 12, 13, 14, 15, 16, 17 |
 
-Tasks 1 et 2 sont mergées dans `main`. Le reste est à faire.
+Tasks 1 et 2 sont mergées dans `main`. Le reste est à faire. La répartition détaillée, l'ordre et les dépendances par membre : `docs/repartition-equipe.md`.
 
 **Séquence de déblocage** : la Task 4 (contrat `AIProvider` + validation des sorties) est le **jalon**. Tant qu'elle n'est pas mergée dans `main`, la Task 8 (services) est bloquée pour Member 1, et les Tasks 11–12 le sont pour Member 3. Member 3 travaille la Task 10 en attendant. Ne pas commencer une tâche dont la dépendance n'est pas mergée dans `main` : le code s'écrit mais la revue devient illisible.
 

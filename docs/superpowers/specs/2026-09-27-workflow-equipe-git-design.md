@@ -75,7 +75,7 @@ Deux jobs parallèles et indépendants : `typecheck` et `test`. Ce sont exacteme
 
 Ces points sont réels mais traités dans leur propre tâche, pas ici :
 
-- appliquer `supabase/schema.sql` au projet dev partagé (Task 2, Steps 2 à 4) ;
+- ~~appliquer `supabase/schema.sql` au projet dev partagé~~ (Task 2, Steps 2 à 4) — **fait le 2026-09-27**, schéma vérifié ;
 - aligner l'identité git sur le compte GitHub pour l'attribution des commits ;
 - remplacer `README.md`, encore le texte de `create-next-app` (Task 17, Step 6) ;
 - supprimer `next lint` du `package.json`.
