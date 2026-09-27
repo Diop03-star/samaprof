@@ -200,14 +200,17 @@ else:
     },
     {
       lesson_id: lessonId,
-      kind: "code" as const,
+      kind: "qcm" as const,
       topic: "Écrire une condition complète",
-      question: "Écrivez un programme qui demande l'âge à l'utilisateur et affiche :\n- 'Mineur' si âge < 18\n- 'Majeur' si 18 ≤ âge < 65\n- 'Senior' si âge ≥ 65",
-      options: null,
-      correct_answer: null,
-      starter_code: "age = int(input('Votre âge : '))\n# Votre code ici",
-      reference_solution: "age = int(input('Votre âge : '))\nif age < 18:\n    print('Mineur')\nelif age < 65:\n    print('Majeur')\nelse:\n    print('Senior')",
-      explanation: "On utilise if/elif/else pour chaîner les conditions. L'ordre compte : on teste d'abord < 18, puis < 65 (ce qui implique ≥ 18), et le else capture ≥ 65.",
+      question: "Quel code affiche correctement 'Mineur', 'Majeur' ou 'Senior' selon l'âge ?",
+      options: [
+        "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')",
+        "if age < 18: print('Mineur')\nif age < 65: print('Majeur')\nif age >= 65: print('Senior')",
+        "if age < 18: print('Mineur')\nelif age >= 18 and age < 65: print('Majeur')\nelse: print('Senior')",
+        "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')"
+      ],
+      correct_answer: "if age < 18: print('Mineur')\nelif age < 65: print('Majeur')\nelse: print('Senior')",
+      explanation: "La bonne structure utilise if/elif/else pour chaîner les conditions mutuellement exclusives. L'ordre compte : on teste d'abord < 18, puis < 65 (ce qui implique ≥ 18), et le else capture ≥ 65. Les options 1, 3 et 4 sont syntaxiquement correctes mais l'option 4 est la plus idiomatique.",
       difficulty: 2,
     },
   ];

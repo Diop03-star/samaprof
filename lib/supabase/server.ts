@@ -1,4 +1,6 @@
+import { createServerClient as createSSRClient, type CookieOptions } from "@supabase/ssr";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
@@ -8,16 +10,15 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  * Client Supabase pour le serveur (Next.js Server Components / Route Handlers).
  * Utilise la clé anon et les cookies de la requête pour respecter la RLS.
  */
-export async function createClient(): Promise<SupabaseClient> {
-  const { cookies } = await import("next/headers");
+export async function createServerClient(): Promise<SupabaseClient> {
   const cookieStore = await cookies();
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createSSRClient(supabaseUrl, supabaseAnonKey, {
     cookies: {
       getAll() {
         return cookieStore.getAll();
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet: Array<{ name: string; value: string; options: CookieOptions }>) {
         try {
           cookiesToSet.forEach(({ name, value, options }) =>
             cookieStore.set(name, value, options)
@@ -47,7 +48,7 @@ export function createServiceClient(): SupabaseClient {
 export type CurrentUser = { userId: string };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
