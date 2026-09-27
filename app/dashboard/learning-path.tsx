@@ -3,11 +3,11 @@ import type { LessonRow } from "@/types";
 
 // Note: If LessonRow doesn't match exactly because types/index.ts is still in flux,
 // we'll adapt it. Here we expect id, title, day at minimum.
-export function LearningPath({ lessons }: { lessons: any[] }) {
+export function LearningPath({ lessons, currentIndex }: { lessons: any[], currentIndex: number }) {
   return (
     <div className="flex flex-col gap-3">
       {lessons.map((lesson, index) => {
-        const state = index === 0 ? "done" : index === 1 ? "current" : "locked";
+        const state = index < currentIndex ? "done" : index === currentIndex ? "current" : "locked";
         return (
           <div
             key={lesson.id}

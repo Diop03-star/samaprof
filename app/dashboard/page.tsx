@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentUser, createClient } from "@/lib/supabase/server";
 import { getLessonsForUser } from "@/services/lesson";
@@ -156,9 +157,12 @@ export default async function DashboardPage() {
                     <span className="font-bold text-on-surface">{decision.nextActivity}</span>
                     <span className="text-sm text-secondary">Difficulté: {decision.difficulty}</span>
                  </div>
-                 <button className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-primary font-bold hover:bg-primary hover:text-white transition-colors">
+                 <Link 
+                    href={`/learn/${currentLesson.id}?kind=code&topic=${encodeURIComponent(topic)}&difficulty=${decision.difficulty}&regenerate=1`}
+                    className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-primary font-bold hover:bg-primary hover:text-white transition-colors"
+                 >
                     →
-                 </button>
+                 </Link>
               </div>
             </div>
           </div>
@@ -168,9 +172,14 @@ export default async function DashboardPage() {
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="font-display text-2xl font-bold text-on-surface">Votre parcours</h3>
-            <span className="font-label-sm text-sm text-primary font-bold">{progress?.completed_lessons ?? 0} / {lessons.length}</span>
+            <div className="flex items-center gap-4">
+               <Link href="/progress" className="font-label-sm text-sm text-primary hover:underline font-bold">
+                 Analyse détaillée →
+               </Link>
+               <span className="font-label-sm text-sm text-secondary font-bold">{progress?.completed_lessons ?? 0} / {lessons.length}</span>
+            </div>
           </div>
-          <LearningPath lessons={lessons} />
+          <LearningPath lessons={lessons} currentIndex={currentIndex} />
         </section>
 
       </div>
