@@ -12,6 +12,8 @@
   PlanInput,
 } from "@/types";
 import { demoProvider } from "./demo";
+import { nvidiaProvider } from "./nvidia";
+import { geminiProvider } from "./gemini";
 import { AIError } from "./http";
 import {
   parseAdaptation,
@@ -41,18 +43,18 @@ function isProvider(value: unknown): value is AIProvider {
   );
 }
 
-// Le nom du module est construit dynamiquement : `tsc` ne peut pas le résoudre,
-// donc la Task 5 compile sans les providers de la Task 9. Le chargement reste
-// paresseux, et le mode démo n'exige aucune clé.
+// Les deux modules distants sont importes statiquement. Une resolution
+// dynamique par `require` echouait silencieusement : le `catch` transformait
+// l'erreur de resolution en simple downgrade vers le mode demo, donc un
+// provider mort ne se voyait nulle part. La Task 9 livre ces deux fichiers,
+// l'import statique est donc resolvable par `tsc` et par le bundler.
 function loadRemoteProvider(name: "nvidia" | "gemini"): AIProvider | null {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require(`./${name}`) as Record<string, unknown>;
-    const exported = mod[`${name}Provider`];
-    return isProvider(exported) ? exported : null;
-  } catch {
-    return null;
-  }
+  const remote: Record<"nvidia" | "gemini", unknown> = {
+    nvidia: nvidiaProvider,
+    gemini: geminiProvider,
+  };
+  const exported = remote[name];
+  return isProvider(exported) ? exported : null;
 }
 
 function remoteProviders(): AIProvider[] {
