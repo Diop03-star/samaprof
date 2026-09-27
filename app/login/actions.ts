@@ -1,7 +1,7 @@
 ﻿"use server";
 
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server";
 
 export async function signIn(
   _prev: string | null,
@@ -12,7 +12,7 @@ export async function signIn(
 
   if (!email || !password) return "Email and password are required.";
 
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) return "Invalid email or password.";
@@ -31,7 +31,7 @@ export async function signUp(
     return "Email is required and password must be at least 8 characters.";
   }
 
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { error } = await supabase.auth.signUp({ email, password });
 
   if (error) return error.message;

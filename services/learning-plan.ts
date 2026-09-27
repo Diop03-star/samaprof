@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server";
+﻿import { createServerClient } from "@/lib/supabase/server";
 import { generateLearningPlan } from "@/lib/ai";
 import type { LearningPlan, OnboardingInput } from "@/types";
 
@@ -6,7 +6,7 @@ export async function createLearningPath(
   userId: string,
   input: OnboardingInput
 ): Promise<LearningPlan> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   const { data: existing } = await supabase
     .from("learning_paths")

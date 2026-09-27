@@ -1,4 +1,4 @@
-﻿import { createClient } from "@/lib/supabase/server";
+﻿import { createServerClient } from "@/lib/supabase/server";
 import { generateLesson } from "@/lib/ai";
 import type { Level, LessonRow } from "@/types";
 
@@ -10,7 +10,7 @@ export type LessonContent = {
 };
 
 export async function getLessonsForUser(userId: string): Promise<LessonRow[]> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   const { data, error } = await supabase
     .from("lessons")
@@ -62,7 +62,7 @@ export async function ensureLessonContent(
     difficulty: lesson.difficulty,
   });
 
-  const supabase = await createClient();
+  const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("lessons")
     .update({
@@ -86,7 +86,7 @@ export async function getLessonById(
   userId: string,
   lessonId: string
 ): Promise<LessonRow | null> {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
 
   const { data, error } = await supabase
     .from("lessons")
