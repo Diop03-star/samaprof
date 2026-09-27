@@ -1,6 +1,6 @@
 export function computeMasteryScore(attempts: { score: number }[]) {
   if (attempts.length === 0) return 0;
-  const recent = attempts.slice(-5);
+  const recent = attempts.slice(0, 5);
   return Math.round(
     recent.reduce((acc, curr) => acc + curr.score, 0) / recent.length
   );
@@ -19,13 +19,7 @@ export function decide(params: { attempts: any[]; currentDifficulty: number; cur
     }
   } else if (score < 40) {
     action = "remediation";
-    // Check for 2 consecutive fails on same topic
-    const recent = params.attempts.slice(-2);
-    if (recent.length === 2 && recent[0].topic === topic && recent[1].topic === topic && recent[0].score < 60 && recent[1].score < 60) {
-       difficulty = Math.max(1, difficulty - 1);
-    } else if (score < 40 && params.attempts.length === 1 && params.attempts[0].score < 40) {
-       // Just keeping the test "mastery 39 => remediation" green without lowering diff for a single fail, unless it specifically says so.
-    }
+    difficulty = Math.max(1, difficulty - 1);
   } else if (score >= 75) {
     action = "increase_difficulty";
     difficulty = Math.min(5, difficulty + 1);
