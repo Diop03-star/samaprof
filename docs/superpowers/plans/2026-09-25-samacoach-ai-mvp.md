@@ -350,11 +350,40 @@ create index if not exists exercises_lesson_idx on public.exercises (lesson_id);
 create index if not exists lessons_path_idx on public.lessons (path_id);
 create index if not exists learning_paths_user_idx on public.learning_paths (user_id);
 
+-- Un SEUL parcours par utilisateur. Le code applicatif teste déjà l'existence d'un
+-- chemin avant d'en créer un, et toutes les lectures filtrent par `user_id` seul
+-- (jamais par `path_id`) — mais sans cette contrainte, un second createLearningPath
+-- insérerait un second chemin puis l'upsert suivant, dont l'arbitre est `user_id`,
+-- réécrirait `path_id` et remettrait les compteurs à zéro. Perte silencieuse, sans
+-- erreur. La base doit imposer le modèle, pas seulement le code.
+create unique index if not exists learning_paths_user_unique_idx on public.learning_paths (user_id);
+
 -- UNIQUE, et pas seulement indexé : `progress` est un état courant unique par
 -- utilisateur. Les .upsert({ onConflict: "user_id" }) du seed et de
 -- services/learning-path s'appuient sur cette contrainte — Postgres refuse
--- `ON CONFLICT (user_id)` si aucun index unique ne correspond.
+-- `ON CONFLICT (user_id)` si aucun index unique ne correspond. Cohérent avec
+-- learning_paths_user_unique_idx ci-dessus : un chemin, une progression.
 create unique index if not exists progress_user_unique_idx on public.progress (user_id);
+
+-- `updated_at` n'est pas écrit par les payloads d'upsert : PostgREST n'écrit que les
+-- colonnes présentes dans le payload, donc la colonne resterait figée à la date de
+-- création. Un trigger la maintient à la source plutôt qu'à chaque site d'appel.
+create or replace function public.touch_updated_at()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  new.updated_at := now();
+  return new;
+end;
+$$;
+
+drop trigger if exists progress_touch_updated_at on public.progress;
+create trigger progress_touch_updated_at
+  before update on public.progress
+  for each row execute function public.touch_updated_at();
 
 -- Provisionnement automatique du profil à l'inscription
 create or replace function public.handle_new_user()
@@ -400,9 +429,23 @@ drop policy if exists "own progress" on public.progress;
 create policy "own progress" on public.progress
   for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
+-- `own attempts` valide `user_id` mais doit aussi prouver que l'exercice visé
+-- appartient bien à l'utilisateur : `exercises.lesson_id` est une contrainte
+-- d'intégrité, pas d'autorisation. Sans cette sous-requête, n'importe quel UUID
+-- d'exercice valide est accepté, y compris celui d'un autre utilisateur. Les lignes
+-- injectées sont invisibles pour la victime, mais faussent tout agrégat inter-utilisateurs.
 drop policy if exists "own attempts" on public.attempts;
 create policy "own attempts" on public.attempts
-  for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+  for all using (user_id = auth.uid())
+  with check (
+    user_id = auth.uid()
+    and exists (
+      select 1 from public.exercises e
+      join public.lessons l on l.id = e.lesson_id
+      join public.learning_paths lp on lp.id = l.path_id
+      where e.id = attempts.exercise_id and lp.user_id = auth.uid()
+    )
+  );
 
 drop policy if exists "own lessons" on public.lessons;
 create policy "own lessons" on public.lessons
@@ -514,15 +557,20 @@ order by tablename;
 
 Expected: 10 policies — `own profiles`, `own learning_paths`, `own progress`, `own attempts` (une chacune, `for all`), plus `own lessons`, `insert own lessons`, `update own lessons`, `own exercises`, `insert own exercises`, `update own exercises`.
 
-Vérifier aussi l'index unique qui porte les `upsert` de `progress` :
+Vérifier aussi les index uniques qui portent les `upsert`, et le trigger de `updated_at` :
 
 ```sql
 select indexname, indexdef
 from pg_indexes
-where schemaname = 'public' and tablename = 'progress';
+where schemaname = 'public' and tablename in ('progress', 'learning_paths')
+order by indexname;
+
+select tgname, tgrelid::regclass
+from pg_trigger
+where not tgisinternal and tgname = 'progress_touch_updated_at';
 ```
 
-Expected: une ligne contenant `progress_user_unique_idx` et `UNIQUE`. Si `indexdef` ne contient pas `UNIQUE`, le seed échouera sur `ON CONFLICT (user_id)`.
+Expected: `learning_paths_user_unique_idx` et `progress_user_unique_idx` avec `UNIQUE` dans `indexdef` — sans quoi le seed échoue sur `ON CONFLICT (user_id)` et un second parcours écraserait la progression. Une ligne pour le trigger `progress_touch_updated_at` sur `public.progress`. Si un `indexdef` ne contient pas `UNIQUE`, le seed échouera.
 
 - [ ] **Step 5: Commit**
 
@@ -5279,7 +5327,18 @@ Ces trois points cassaient l'application à l'exécution. Corrigés dans le plan
 |---|---|---|
 | `vitest.config.ts` resolvait l'alias `@` avec `__dirname`, dans un fichier en syntaxe ESM sans `"type": "module"` | `__dirname` n'existait que parce que Vite chargeait la config en CommonJS ; les deux remèdes naturels (`.mts`, `"type": "module"`) le font.throw `ReferenceError` et cassent toute la suite | `path.resolve(process.cwd(), ".")`, valable sous tout chargeur ; `tests/alias.test.ts` garde la cible de l'alias ; décompte de tests porté à 44 |
 
-### Précisions issues de l'application réelle de ce correctif
+### Défauts trouvés par la revue de la Task 2, avant application du schéma
+
+Le schéma n'était pas encore collé dans Supabase au moment de la revue : les trois
+corrections ont donc été faites dans le plan avant qu'il devienne réel.
+
+| Défaut | Symptôme | Correction |
+|---|---|---|
+| `progress` unique sur `user_id` seul, alors que la table porte aussi `path_id` et que `learning_paths` n'est pas unique | Un second `createLearningPath` insère un second chemin, puis l'upsert suivant — dont l'arbitre est `user_id` — réécrit `path_id` et renvoie `completed_lessons`, `mastery_score` et `current_level` à zéro. Perte silencieuse, aucune erreur. Toutes les lectures du plan filtrent par `user_id` seul, jamais par `path_id` | `create unique index learning_paths_user_unique_idx on public.learning_paths (user_id)` : un seul parcours par utilisateur, garanti par la base. `progress` reste unique sur `user_id`, ce qui devient cohérent |
+| `progress.updated_at` déclaré mais jamais écrit | Ni trigger, ni `updated_at` dans les payloads d'upsert — et PostgREST n'écrit que les colonnes présentes dans le payload. La colonne reste figée à la date de création, et le nom promet une sémantique qu'elle n'a pas | Trigger `touch_updated_at()` + `before update on public.progress`, maintenu à la source plutôt qu'à chaque site d'appel |
+| `own attempts` ne vérifiait que `attempts.user_id`, jamais `attempts.exercise_id` | `exercises.lesson_id` est une contrainte d'intégrité, pas d'autorisation : n'importe quel UUID d'exercice valide est accepté, y compris celui d'un autre utilisateur. Les lignes injectées sont invisibles pour la victime mais faussent tout agrégat inter-utilisateurs | La sous-requête de propriété à deux sauts est ajoutée au `with check`, dans le style des policies `lessons`/`exercises`. L'arête `attempts → exercises → lessons → learning_paths` garde le graphe acyclique |
+
+### Précisions issues de l'application réelle du correctif de la Task 1
 
 Deux affirmations se sont révélées fausses à l'exécution, et sont corrigées ci-dessus
 dans la Task 1 :
